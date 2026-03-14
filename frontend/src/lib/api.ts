@@ -11,7 +11,7 @@ export async function resolveIssue(issueId: string): Promise<{ run_id: string }>
 
 /** Connect a GitHub repository */
 export async function connectRepository(fullName: string): Promise<void> {
-  const { error, data } = await supabase.functions.invoke('connect-repository', {
+  const { error } = await supabase.functions.invoke('connect-repository', {
     body: { full_name: fullName },
   })
   if (error) {

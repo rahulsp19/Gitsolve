@@ -71,7 +71,7 @@ interface AnalysisState {
   reset: () => void
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_URL = import.meta.env.VITE_API_URL || ''
 
 function getAuthHeaders(): Record<string, string> {
   const session = useAuthStore.getState().session as any

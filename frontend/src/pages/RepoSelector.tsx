@@ -5,14 +5,15 @@ import { useRepositories, useConnectRepository } from '@/hooks/useRepositories'
 import { useAvailableRepositories } from '@/hooks/useAvailableRepositories'
 import { useAuthStore } from '@/stores/authStore'
 import { useAnalysisStore } from '@/stores/analysisStore'
+import { Logo } from '../components/Logo'
 
 type FilterType = 'all' | 'public' | 'private'
 type SortType = 'updated' | 'stars' | 'name'
 
 export default function RepoSelector() {
   const { user } = useAuthStore()
-  const { data: repos = [], isLoading } = useRepositories()
-  const { data: availableRepos = [], isLoading: isLoadingAvailable } = useAvailableRepositories()
+  const { data: repos = [] } = useRepositories()
+  useAvailableRepositories()
   const { mutate: connectRepo, isPending: isConnecting } = useConnectRepository()
   const { startAnalysis } = useAnalysisStore()
   const navigate = useNavigate()
@@ -73,8 +74,8 @@ export default function RepoSelector() {
       <aside className="hidden md:flex flex-col w-64 border-r border-primary/10 bg-[#111921]/50">
         <div className="p-6 border-b border-primary/10">
           <Link to="/" className="flex items-center gap-3">
-            <div className="p-2 bg-primary rounded-lg text-white shadow-lg shadow-primary/20">
-              <span className="material-symbols-outlined">terminal</span>
+            <div className="p-2 bg-primary/10 border border-primary/20 rounded-lg shadow-lg shadow-primary/10 flex items-center justify-center">
+              <Logo className="text-primary w-6 h-6" />
             </div>
             <span className="font-bold text-xl tracking-tight text-white">GitSolve</span>
           </Link>

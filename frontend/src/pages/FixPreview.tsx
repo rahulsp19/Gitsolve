@@ -5,7 +5,7 @@ import { useAnalysisStore } from '@/stores/analysisStore'
 export default function FixPreview() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { issues, currentFix, fixLoading, resolveIssue, createPR, prLoading, prResult, repoUrl } = useAnalysisStore()
+  const { issues, currentFix, fixLoading, resolveIssue, createPR, prLoading, prResult } = useAnalysisStore()
 
   const issue = issues.find(i => i.id === id)
 
@@ -222,7 +222,7 @@ function buildDiffLines(original: string, fixed: string): DiffLine[] {
 
   // Simple diff: show removed lines, then added lines
   // For a more sophisticated diff, we could use the 'diff' library
-  const maxLen = Math.max(origLines.length, fixedLines.length)
+  // For a more sophisticated diff, we could use the 'diff' library
 
   // If codes are the same, just show as context
   if (original.trim() === fixed.trim()) {
