@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Issue Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#248aeb",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111921",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<header class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark sticky top-0 z-50">
+<div class="flex items-center p-4 justify-between max-w-7xl mx-auto w-full">
+<div class="flex items-center gap-3">
+<div class="text-primary flex size-10 items-center justify-center bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">Sentinel AI</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg px-3 py-1.5 border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-slate-500 text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 text-slate-200" placeholder="Search issues..." type="text"/>
+</div>
+<button class="relative text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-background-dark"></span>
+</button>
+<div class="h-8 w-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="User profile avatar icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6Aeb9ZB95CFw1DS-fwa3ovCzJayaBpqVhbPH20411Vdb1eWoHqcb2-cH9rJMZ1BbUjZYW-TV_1uIaCCTwKX_MQCIPKxsJr2iBhp8DjjMeL1eZ_sm1A3-CsAk-YFLyMZ5ogKP0Bb7qnWKRWuMtKXAcMDs6L-uyBA9xVsXw4mSFwOqVBPfrekjL38AC2mPPJ70QZLO7igwnTOm5gAb00jgfjn908NF4TVKMdOBS7OcXLNmKX4ORcVtzkEwOOKx3q2Z1ngHo6qKbhus"/>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 max-w-7xl mx-auto w-full p-4 md:p-6">
+<div class="mb-8">
+<h1 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Issue Summary</h1>
+<p class="text-slate-500 dark:text-slate-400">AI-detected vulnerabilities and performance bottlenecks across your codebase.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Active Issues</p>
+<span class="material-symbols-outlined text-primary">analytics</span>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-slate-900 dark:text-white tracking-tight text-3xl font-bold leading-tight">42</p>
+<p class="text-emerald-500 text-sm font-medium flex items-center"><span class="material-symbols-outlined text-sm">trending_up</span> 12%</p>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Critical Alerts</p>
+<span class="material-symbols-outlined text-red-500">error</span>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-slate-900 dark:text-white tracking-tight text-3xl font-bold leading-tight">07</p>
+<p class="text-red-500 text-sm font-medium flex items-center"><span class="material-symbols-outlined text-sm">trending_up</span> 2%</p>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">AI Resolved</p>
+<span class="material-symbols-outlined text-emerald-500">auto_fix_high</span>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-slate-900 dark:text-white tracking-tight text-3xl font-bold leading-tight">156</p>
+<p class="text-emerald-500 text-sm font-medium flex items-center"><span class="material-symbols-outlined text-sm">check_circle</span> 88%</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col md:flex-row gap-3 mb-6 items-center justify-between">
+<div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary px-4 text-white text-sm font-semibold">
+<span>All Issues</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-slate-100 dark:bg-slate-800 px-4 text-slate-700 dark:text-slate-300 text-sm font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span>Critical</span>
+<span class="bg-red-500/20 text-red-500 px-1.5 py-0.5 rounded text-[10px] font-bold">7</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-slate-100 dark:bg-slate-800 px-4 text-slate-700 dark:text-slate-300 text-sm font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span>Performance</span>
+<span class="bg-amber-500/20 text-amber-500 px-1.5 py-0.5 rounded text-[10px] font-bold">12</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-slate-100 dark:bg-slate-800 px-4 text-slate-700 dark:text-slate-300 text-sm font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span>Security</span>
+<span class="bg-blue-500/20 text-blue-500 px-1.5 py-0.5 rounded text-[10px] font-bold">23</span>
+</button>
+</div>
+<div class="flex items-center gap-2 w-full md:w-auto">
+<span class="text-sm text-slate-500">Sort by:</span>
+<button class="flex items-center gap-1 text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5">
+                    Newest First
+                    <span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+</div>
+</div>
+<div class="space-y-4 mb-24">
+<div class="group bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:border-primary/50 transition-all duration-300">
+<div class="flex flex-col lg:flex-row lg:items-center gap-4">
+<div class="flex-1">
+<div class="flex flex-wrap items-center gap-3 mb-2">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">N+1 Query Detected in Product List</h3>
+<span class="bg-red-500/10 text-red-500 border border-red-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider">Critical</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-3">
+<span class="material-symbols-outlined text-sm">folder</span>
+<code class="bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded font-mono text-xs">src/api/controllers/productController.ts:142</code>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed max-w-3xl">
+                            Fetching associated category labels for each product entry individually. This causes multiple database roundtrips that can be optimized using a single JOIN operation or eager loading.
+                        </p>
+</div>
+<div class="flex items-center gap-3 lg:self-center">
+<button class="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-primary/20 transition-all">
+<span class="material-symbols-outlined text-[18px]">auto_fix_high</span>
+                            Resolve with AI
+                        </button>
+<button class="p-2.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:border-primary/50 transition-all duration-300">
+<div class="flex flex-col lg:flex-row lg:items-center gap-4">
+<div class="flex-1">
+<div class="flex flex-wrap items-center gap-3 mb-2">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Unsanitized User Input in Search</h3>
+<span class="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider">Warning</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-3">
+<span class="material-symbols-outlined text-sm">folder</span>
+<code class="bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded font-mono text-xs">src/ui/components/SearchBox.tsx:58</code>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed max-w-3xl">
+                            The search query is being rendered directly into the DOM without escaping, potentially allowing for Cross-Site Scripting (XSS) attacks in legacy browsers.
+                        </p>
+</div>
+<div class="flex items-center gap-3 lg:self-center">
+<button class="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-primary/20 transition-all">
+<span class="material-symbols-outlined text-[18px]">auto_fix_high</span>
+                            Resolve with AI
+                        </button>
+<button class="p-2.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:border-primary/50 transition-all duration-300 opacity-80">
+<div class="flex flex-col lg:flex-row lg:items-center gap-4">
+<div class="flex-1">
+<div class="flex flex-wrap items-center gap-3 mb-2">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Redundant Re-renders in Dashboard</h3>
+<span class="bg-blue-500/10 text-blue-500 border border-blue-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider">Info</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-3">
+<span class="material-symbols-outlined text-sm">folder</span>
+<code class="bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded font-mono text-xs">src/ui/views/MainDashboard.tsx:210</code>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed max-w-3xl">
+                            The `StatCard` component is re-rendering on every parent state change even when its specific props haven't changed. Suggesting React.memo optimization.
+                        </p>
+</div>
+<div class="flex items-center gap-3 lg:self-center">
+<button class="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-primary/20 transition-all">
+<span class="material-symbols-outlined text-[18px]">auto_fix_high</span>
+                            Resolve with AI
+                        </button>
+<button class="p-2.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:border-primary/50 transition-all duration-300">
+<div class="flex flex-col lg:flex-row lg:items-center gap-4">
+<div class="flex-1">
+<div class="flex flex-wrap items-center gap-3 mb-2">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Dead Code Found: authModuleLegacy.js</h3>
+<span class="bg-blue-500/10 text-blue-500 border border-blue-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider">Info</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-3">
+<span class="material-symbols-outlined text-sm">folder</span>
+<code class="bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded font-mono text-xs">src/lib/legacy/authModuleLegacy.js</code>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed max-w-3xl">
+                            This module is no longer imported anywhere in the production bundle. Deleting it will reduce artifact size by approximately 12KB.
+                        </p>
+</div>
+<div class="flex items-center gap-3 lg:self-center">
+<button class="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-primary/20 transition-all">
+<span class="material-symbols-outlined text-[18px]">auto_fix_high</span>
+                            Resolve with AI
+                        </button>
+<button class="p-2.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<nav class="fixed bottom-0 w-full z-50">
+<div class="flex gap-2 border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/90 backdrop-blur-md px-4 pb-4 pt-3 max-w-7xl mx-auto shadow-2xl">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-[10px] font-semibold leading-normal uppercase tracking-wider">Dashboard</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-[1]">warning</span>
+<p class="text-[10px] font-bold leading-normal uppercase tracking-wider">Issues</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">history</span>
+<p class="text-[10px] font-semibold leading-normal uppercase tracking-wider">History</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-[10px] font-semibold leading-normal uppercase tracking-wider">Settings</p>
+</a>
+</div>
+</nav>
+</body></html>

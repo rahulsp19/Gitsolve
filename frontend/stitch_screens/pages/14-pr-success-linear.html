@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#6366f1",
+                        "background-light": "#ffffff",
+                        "background-dark": "#09090b",
+                        "border-dark": "#27272a"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.375rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }</script>
+<title>Pull Request Created</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Top Navigation / Header -->
+<header class="flex items-center justify-center py-12">
+<div class="flex flex-col items-center gap-4">
+<div class="bg-emerald-500/10 text-emerald-500 size-12 flex items-center justify-center rounded-full ring-1 ring-emerald-500/20">
+<span class="material-symbols-outlined text-2xl">check</span>
+</div>
+<h1 class="text-slate-900 dark:text-slate-50 text-3xl font-semibold tracking-tight">Pull request created</h1>
+</div>
+</header>
+<main class="flex-1 max-w-xl mx-auto w-full">
+<!-- Success Hero Section -->
+<section class="flex flex-col px-6 pb-12">
+<div class="flex flex-col items-center gap-8">
+<p class="text-slate-600 dark:text-slate-400 text-lg font-normal leading-normal max-w-[540px] text-center">
+                            Your pull request has been successfully created and is ready for review by your team.
+                        </p>
+<div class="flex flex-wrap gap-3 justify-center">
+<button class="flex min-w-[140px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-5 bg-indigo-600 text-white text-sm font-medium transition-all hover:bg-indigo-500 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+<span class="truncate">View on GitHub</span>
+</button>
+<button class="flex min-w-[140px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-medium border border-slate-200 dark:border-slate-800 transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50 shadow-sm">
+<span class="truncate">Copy PR Link</span>
+</button>
+</div>
+</div>
+</section>
+<!-- PR Details Section -->
+<section class="px-6 py-8 border-t border-slate-100 dark:border-slate-800/60">
+<h3 class="text-slate-900 dark:text-slate-100 text-sm font-semibold uppercase tracking-wider pb-6 opacity-60">PR Details</h3>
+<div class="space-y-0">
+<div class="flex justify-between items-center py-4 border-b border-slate-100 dark:border-slate-800/40">
+<p class="text-slate-500 dark:text-slate-400 text-sm">Repository</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-slate-400">book</span>
+<p class="text-slate-900 dark:text-slate-100 text-sm font-medium">mobile-app-ui</p>
+</div>
+</div>
+<div class="flex justify-between items-center py-4 border-b border-slate-100 dark:border-slate-800/40">
+<p class="text-slate-500 dark:text-slate-400 text-sm">Branch</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-slate-400">fork_right</span>
+<code class="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-indigo-500 dark:text-indigo-400 text-xs font-mono">feature/dark-mode-updates</code>
+</div>
+</div>
+<div class="flex justify-between items-center py-4 border-b border-slate-100 dark:border-slate-800/40">
+<p class="text-slate-500 dark:text-slate-400 text-sm">Commit</p>
+<p class="text-slate-900 dark:text-slate-100 text-sm font-mono opacity-80">feat: implement success state themes</p>
+</div>
+<div class="flex justify-between items-center py-4">
+<p class="text-slate-500 dark:text-slate-400 text-sm">PR Title</p>
+<p class="text-slate-900 dark:text-slate-100 text-sm font-medium">Implement Enhanced Success Confirmation Page</p>
+</div>
+</div>
+</section>
+<!-- AI Summary Card -->
+<section class="px-6 py-8 border-t border-slate-100 dark:border-slate-800/60">
+<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 p-6 shadow-sm">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-2 text-indigo-500 dark:text-indigo-400">
+<span class="material-symbols-outlined text-xl">auto_awesome</span>
+<p class="text-sm font-semibold uppercase tracking-wider">AI Summary</p>
+</div>
+<p class="text-slate-700 dark:text-slate-300 text-sm font-normal leading-relaxed">
+                            This PR introduces a new success confirmation screen for the pull request flow. It includes dynamic repository metadata, automated change summaries powered by AI, and full support for the new dark mode design system. Key improvements include better layout responsiveness and updated Material Symbols integration.
+                        </p>
+<div class="pt-2">
+<button class="text-xs font-medium flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-indigo-500 transition-colors">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+                        Regenerate Summary
+                    </button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Footer -->
+<footer class="p-8 text-center">
+<p class="text-slate-500 dark:text-slate-600 text-xs">
+                Generated with ❤️ by GitFlow AI
+            </p>
+</footer>
+</div>
+</body></html>

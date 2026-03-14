@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Repository Analysis - AI Agent Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5e6ad2",
+                        "background-dark": "#0b0c0d",
+                        "surface-dark": "#151618",
+                        "border-dark": "rgba(255, 255, 255, 0.08)",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "system-ui", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "8px", "lg": "10px", "xl": "12px", "full": "9999px"},
+                    letterSpacing: {
+                        "tight": "-0.02em",
+                        "tighter": "-0.03em"
+                    }
+                },
+            },
+        }</script>
+<style>body {
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.01em;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+            font-size: 20px;
+        }
+        .linear-glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(8px);
+        }
+        .glow-primary {
+            box-shadow: 0 0 20px rgba(94, 106, 210, 0.15);
+        }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-dark text-slate-400 font-display">
+<div class="relative flex min-h-screen flex-col overflow-x-hidden">
+<header class="flex items-center bg-background-dark/80 backdrop-blur-md p-4 border-b border-border-dark justify-between sticky top-0 z-50">
+<div class="flex items-center gap-3">
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div>
+<h2 class="text-sm font-semibold text-slate-100 tracking-tight">Repository Analysis</h2>
+<p class="text-[11px] text-slate-500">nebula-core-v2</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-2 py-1 rounded-full bg-primary/10 border border-primary/20">
+<span class="flex h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_#5e6ad2]"></span>
+<span class="text-[10px] font-semibold uppercase tracking-wider text-primary">Live Scan</span>
+</div>
+<button class="p-1 text-slate-500 hover:text-white">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</header>
+<main class="flex-1 max-w-5xl mx-auto w-full p-4 lg:p-8">
+<section class="mb-10">
+<div class="linear-glass border border-border-dark rounded-xl p-8 glow-primary">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">analytics</span>
+<p class="text-sm font-medium text-slate-200">Analysis in Progress</p>
+</div>
+<p class="text-slate-100 text-2xl font-bold tracking-tighter">75<span class="text-sm font-normal text-slate-500 ml-1">%</span></p>
+</div>
+<div class="w-full bg-white/5 rounded-full h-1 overflow-hidden">
+<div class="bg-primary h-full rounded-full transition-all duration-700 shadow-[0_0_12px_#5e6ad2]" style="width: 75%;"></div>
+</div>
+<div class="flex items-center gap-2 mt-6">
+<span class="material-symbols-outlined text-xs text-primary animate-spin">refresh</span>
+<p class="text-[12px] text-slate-400">Currently running: <span class="text-slate-200 font-medium">Code Generation Agent</span></p>
+</div>
+</div>
+</section>
+<section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+<div class="flex flex-col gap-1 rounded-lg p-4 border border-border-dark bg-white/[0.02]">
+<p class="text-slate-500 text-[11px] font-semibold uppercase tracking-wider">Files Scanned</p>
+<div class="flex items-baseline justify-between">
+<p class="text-xl font-bold text-slate-100 tracking-tighter">1,284</p>
+<p class="text-emerald-500 text-[11px] font-bold">+120</p>
+</div>
+</div>
+<div class="flex flex-col gap-1 rounded-lg p-4 border border-border-dark bg-white/[0.02]">
+<p class="text-slate-500 text-[11px] font-semibold uppercase tracking-wider">Functions Analyzed</p>
+<div class="flex items-baseline justify-between">
+<p class="text-xl font-bold text-slate-100 tracking-tighter">4,512</p>
+<p class="text-emerald-500 text-[11px] font-bold">+450</p>
+</div>
+</div>
+<div class="flex flex-col gap-1 rounded-lg p-4 border border-border-dark bg-white/[0.02]">
+<p class="text-slate-500 text-[11px] font-semibold uppercase tracking-wider">Issues Detected</p>
+<div class="flex items-baseline justify-between">
+<p class="text-xl font-bold text-slate-100 tracking-tighter">24</p>
+<p class="text-amber-500 text-[11px] font-bold">+3</p>
+</div>
+</div>
+<div class="flex flex-col gap-1 rounded-lg p-4 border border-border-dark bg-white/[0.02]">
+<p class="text-slate-500 text-[11px] font-semibold uppercase tracking-wider">Security Risks</p>
+<div class="flex items-baseline justify-between">
+<p class="text-xl font-bold text-slate-100 tracking-tighter">12</p>
+<p class="text-emerald-500 text-[11px] font-bold">-2</p>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-sm font-semibold text-slate-100 tracking-tight">AI Agent Timeline</h3>
+<div class="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-slate-500 border border-border-dark px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[12px]">list_alt</span> Sequence View
+</div>
+</div>
+<div class="relative space-y-10 before:absolute before:inset-0 before:ml-4 before:h-full before:w-[1px] before:bg-gradient-to-b before:from-emerald-500/50 before:via-primary/50 before:to-transparent">
+<div class="relative flex items-start gap-6 group pl-2">
+<div class="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-500 z-10 shrink-0 mt-1">
+<span class="material-symbols-outlined text-[12px] font-bold">check</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between mb-1">
+<h4 class="text-sm font-semibold text-slate-200">Issue Understanding Agent</h4>
+<time class="text-[10px] font-medium text-slate-500">09:41 AM</time>
+</div>
+<p class="text-sm text-slate-500 leading-relaxed">Parsed requirement and identified core logic inconsistency in the authentication middleware.</p>
+</div>
+</div>
+<div class="relative flex items-start gap-6 group pl-2">
+<div class="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-500 z-10 shrink-0 mt-1">
+<span class="material-symbols-outlined text-[12px] font-bold">check</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between mb-1">
+<h4 class="text-sm font-semibold text-slate-200">Repository Exploration Agent</h4>
+<time class="text-[10px] font-medium text-slate-500">09:42 AM</time>
+</div>
+<p class="text-sm text-slate-500 leading-relaxed">Mapped relevant dependencies across 4 modules. Found implementations in <code class="text-primary bg-primary/5 px-1 rounded">/src/auth/*</code>.</p>
+</div>
+</div>
+<div class="relative flex items-start gap-6 group pl-2">
+<div class="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-500 z-10 shrink-0 mt-1">
+<span class="material-symbols-outlined text-[12px] font-bold">check</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between mb-1">
+<h4 class="text-sm font-semibold text-slate-200">Code Localization Agent</h4>
+<time class="text-[10px] font-medium text-slate-500">09:44 AM</time>
+</div>
+<p class="text-sm text-slate-500 leading-relaxed">Pinpointed error to <code class="text-primary bg-primary/5 px-1 rounded">authProvider.ts</code> line 242. Stack trace matches current context.</p>
+</div>
+</div>
+<div class="relative flex items-start gap-6 group pl-2">
+<div class="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-500 z-10 shrink-0 mt-1">
+<span class="material-symbols-outlined text-[12px] font-bold">check</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between mb-1">
+<h4 class="text-sm font-semibold text-slate-200">Solution Planning Agent</h4>
+<time class="text-[10px] font-medium text-slate-500">09:45 AM</time>
+</div>
+<p class="text-sm text-slate-500 leading-relaxed">Drafted 3-step refactor plan to consolidate token validation logic.</p>
+</div>
+</div>
+<div class="relative flex items-start gap-6 group pl-2">
+<div class="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white z-10 shrink-0 mt-1 shadow-[0_0_10px_#5e6ad2]">
+<span class="material-symbols-outlined text-[12px] animate-spin">smart_toy</span>
+</div>
+<div class="flex-1 p-4 rounded-xl border border-primary/30 bg-primary/[0.03] linear-glass">
+<div class="flex items-center justify-between mb-2">
+<h4 class="text-sm font-semibold text-primary tracking-tight">Code Generation Agent</h4>
+<span class="text-[10px] font-bold text-primary px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/20">ACTIVE</span>
+</div>
+<p class="text-sm text-slate-200 leading-relaxed mb-4">Writing optimized TypeScript patches and generating corresponding unit tests...</p>
+<div class="w-full bg-primary/20 h-0.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[40%] shadow-[0_0_8px_#5e6ad2]"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<nav class="sticky bottom-0 w-full flex border-t border-border-dark bg-background-dark/95 backdrop-blur-md px-6 pb-8 pt-4 z-50">
+<a class="flex flex-1 flex-col items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<p class="text-[10px] font-semibold tracking-wide">Dashboard</p>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1.5 text-primary" href="#">
+<span class="material-symbols-outlined fill-[1]">account_tree</span>
+<p class="text-[10px] font-semibold tracking-wide">Analysis</p>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+<p class="text-[10px] font-semibold tracking-wide">Agents</p>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-[10px] font-semibold tracking-wide">Settings</p>
+</a>
+</nav>
+</div>
+</body></html>

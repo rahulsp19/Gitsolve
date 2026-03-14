@@ -1,0 +1,38 @@
+Agentic GitHub Issue Resolver — Frontend Flow & Stitch Prompt Pack
+This document contains the complete frontend interaction flow and pagenwise Stitch prompts for building the UI of the Agentic GitHub Issue Resolver project during a hackathon. The UI is designed as a modern developer dashboard with GitHub integration and AIndriven repository analysis.
+
+Interactive Frontend Flow
+• Screen 1 — GitHub Login: Shows the OAuth entry point with the exact permission scopes requested (read repo, read issues, create PRs). Click 'Continue with GitHub' to authenticate.
+• Screen 2 — Repo Selector: Displays connected repositories with language, star count, and open issue counts. Users can search, select a repository, and click 'Scan'.
+• Screen 3 — Scanner Progress: Animates through scan phases including cloning repository, file parsing, static analysis, dependency CVE check, secrets scanning, AI analysis, and summary generation.
+• Screen 4 — Results Dashboard: Shows the vulnerability report with severity metric cards and a filterable list of findings. Each vulnerability card expands to reveal vulnerable code in red and suggested fixes in green with a 'Generate Fix PR' button.
+• Screen 5 — AI Summary: Displays a written security assessment, risk score, and a prioritized action plan divided into 'Today', 'This Sprint', and 'Next Sprint'.
+• PR Modal: Displays the exact code diff that will be committed and allows the user to open a pull request on GitHub with one click.
+
+Stitch Page Prompts
+Landing Page Prompt
+Create a landing page for an AI developer tool called 'Agentic GitHub Issue Resolver'. Tagline: Autonomous AI that reads GitHub issues, fixes bugs, and creates pull requests. Include a hero section with product title, tagline, description, and 'Login with GitHub' CTA. Add three feature cards: AI Issue Analysis, Repository Intelligence, Automated Fix Generation. Include a product preview section and footer links.
+
+GitHub Login Page Prompt
+Create a GitHub OAuth login page with a centered authentication card. Title: Connect your GitHub account. Explain that the app needs repository read access and permission to create pull requests. Include primary button 'Login with GitHub' and optional email login.
+
+Repository Selection Page Prompt
+Create a repository selection dashboard. Include search bar and repository cards showing repo name, language, stars, last update time, and an 'Analyze Repository' button. Include sidebar navigation and developer dashboard layout.
+
+Repository Analysis Page Prompt
+Create an analysis dashboard showing repository statistics and scanning progress. Display metric cards such as files scanned, functions analyzed, issues detected, and security risks. Include charts for severity distribution and repository health score.
+
+Issues Summary Page Prompt
+Create an issue summary dashboard listing AIndetected problems. Each issue card should show title, severity badge, affected file path, short AI description, and a 'Resolve with AI' button.
+
+AI Reasoning Visualization Prompt
+Create a timeline style UI showing how AI agents analyzed the issue. Steps include: Issue Understanding Agent, Repository Exploration Agent, Code Localization Agent, Solution Planning Agent, and Code Generation Agent. Each step should display analyzed files and reasoning notes.
+
+Fix Preview Page Prompt
+Create a code review style page displaying a diff viewer. Removed code should appear in red and added code in green. Include an AI explanation panel and buttons for 'Create Pull Request' and 'Regenerate Fix'.
+
+Pull Request Result Page Prompt
+Create a success confirmation page showing PR creation result. Include repository name, branch, commit message, PR title, and link to view the PR on GitHub. Add AI summary of the changes made.
+
+Repository Health Dashboard Prompt
+Create a dashboard displaying repository health metrics. Show repository health score, issues fixed, vulnerabilities removed, and code quality improvements. Include charts and an AI summary describing improvements. Use GitHub-style code diff viewer. Red removed lines. Green added lines. Developer-friendly monospace layout.

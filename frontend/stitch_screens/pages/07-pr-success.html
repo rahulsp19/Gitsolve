@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#248aeb",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111921",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<title>Pull Request Created</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Top Navigation / Header -->
+<header class="flex items-center bg-background-light dark:bg-background-dark p-4 border-b border-slate-200 dark:border-slate-800 justify-between">
+<div class="text-primary flex size-10 shrink-0 items-center justify-center">
+<span class="material-symbols-outlined text-3xl">check_circle</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10">Pull Request Created</h2>
+<div class="size-10"></div> <!-- Spacer for centering -->
+</header>
+<main class="flex-1 max-w-2xl mx-auto w-full">
+<!-- Success Hero Section -->
+<section class="flex flex-col px-4 py-8">
+<div class="flex flex-col items-center gap-6">
+<div class="bg-primary/10 flex items-center justify-center rounded-xl w-full max-w-[400px] aspect-video border border-primary/20 bg-center bg-no-repeat bg-cover" data-alt="Abstract coding background with purple and blue glowing lines" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC9JxMM5rA53Dhi8LTANte4rvzdTgzJaqkmlQfCdIwhx4Ka3-XG5RUbuvU6R5Y3ndh8cS-tolFljvk6vHBwIUcahPiuhyLlC3--gev1Rq2pOsnqUHksN5g75Ll0KyA4nXAmzIfj-PtDB2KTV3gRVFKPPHBIe3n7gAppgOYnYrhcvMTdZHpc48qKkIU5ImjbFEfmTl_dXGttWh4DQtbNqY1ZUu24N83i8jFl6ejM6-g88B7YY09qc0YO-nzD6xWUiTH1qXmT93duVmk");'>
+</div>
+<div class="flex max-w-[480px] flex-col items-center gap-2">
+<h1 class="text-slate-900 dark:text-white text-2xl font-bold leading-tight tracking-tight text-center">Success!</h1>
+<p class="text-slate-600 dark:text-slate-400 text-base font-normal leading-normal max-w-[480px] text-center">
+                            Your pull request has been successfully created and is ready for review by your team.
+                        </p>
+</div>
+<div class="flex flex-wrap gap-3 justify-center">
+<button class="flex min-w-[140px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-11 px-6 bg-primary text-white text-sm font-bold leading-normal tracking-wide transition-colors hover:bg-primary/90">
+<span class="material-symbols-outlined text-sm">open_in_new</span>
+<span class="truncate">View on GitHub</span>
+</button>
+<button class="flex min-w-[140px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-11 px-6 bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-bold leading-normal tracking-wide transition-colors hover:bg-slate-300 dark:hover:bg-slate-700">
+<span class="truncate">Copy PR Link</span>
+</button>
+</div>
+</div>
+</section>
+<!-- PR Details Section -->
+<section class="px-4 py-4">
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight pb-4">PR Details</h3>
+<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 p-4 space-y-1">
+<div class="flex justify-between items-center gap-x-6 py-2 border-b border-slate-100 dark:border-slate-800/50 last:border-0">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Repository</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs text-slate-400">inventory_2</span>
+<p class="text-slate-900 dark:text-white text-sm font-semibold text-right">mobile-app-ui</p>
+</div>
+</div>
+<div class="flex justify-between items-center gap-x-6 py-2 border-b border-slate-100 dark:border-slate-800/50 last:border-0">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Branch</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs text-slate-400">account_tree</span>
+<code class="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-primary text-xs font-mono">feature/dark-mode-updates</code>
+</div>
+</div>
+<div class="flex justify-between items-center gap-x-6 py-2 border-b border-slate-100 dark:border-slate-800/50 last:border-0">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Commit</p>
+<p class="text-slate-900 dark:text-white text-sm font-normal text-right italic">"feat: implement success state themes"</p>
+</div>
+<div class="flex justify-between items-center gap-x-6 py-2 last:border-0">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">PR Title</p>
+<p class="text-slate-900 dark:text-white text-sm font-bold text-right">Implement Enhanced Success Confirmation Page</p>
+</div>
+</div>
+</section>
+<!-- AI Summary Card -->
+<section class="p-4 @container">
+<div class="flex flex-col items-start justify-between gap-6 rounded-xl border border-primary/30 bg-primary/5 dark:bg-primary/10 p-6 @[480px]:flex-row @[480px]:items-center">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-xl">auto_awesome</span>
+<p class="text-base font-bold leading-tight">AI Summary</p>
+</div>
+<p class="text-slate-700 dark:text-slate-300 text-sm font-normal leading-relaxed">
+                            This PR introduces a new success confirmation screen for the pull request flow. It includes dynamic repository metadata, automated change summaries powered by AI, and full support for the new dark mode design system. Key improvements include better layout responsiveness and updated Material Symbols integration.
+                        </p>
+</div>
+</div>
+<div class="mt-4 flex justify-end">
+<button class="text-xs font-bold leading-normal tracking-wide flex items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">refresh</span>
+                        Regenerate Summary
+                    </button>
+</div>
+</section>
+</main>
+<!-- Footer Footer -->
+<footer class="p-8 text-center">
+<p class="text-slate-500 dark:text-slate-600 text-xs">
+                Generated with ❤️ by GitFlow AI
+            </p>
+</footer>
+</div>
+</body></html>

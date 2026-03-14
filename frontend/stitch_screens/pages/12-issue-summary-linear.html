@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Issue Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5e6ad2",
+                        "background-dark": "#0d0e12",
+                        "border-subtle": "rgba(255, 255, 255, 0.08)",
+                        "surface": "#15161c"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "system-ui", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "4px",
+                        "lg": "6px",
+                        "xl": "8px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<header class="border-b border-white/5 bg-[#0d0e12]/80 backdrop-blur-md sticky top-0 z-50">
+<div class="flex items-center px-4 h-12 justify-between max-w-full mx-auto w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400 text-[20px]">menu</span>
+<div class="flex items-center gap-2">
+<span class="text-slate-400 text-sm">Sentinel AI</span>
+<span class="text-slate-600">/</span>
+<h2 class="text-slate-100 text-sm font-medium">Issues</h2>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center bg-white/5 rounded px-2 py-1 border border-white/5">
+<span class="material-symbols-outlined text-slate-500 text-[18px]">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-xs w-32 text-slate-300 placeholder-slate-600" placeholder="Search..." type="text"/>
+</div>
+<button class="text-slate-500 hover:text-slate-300">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<img alt="User" class="w-6 h-6 rounded-full border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6Aeb9ZB95CFw1DS-fwa3ovCzJayaBpqVhbPH20411Vdb1eWoHqcb2-cH9rJMZ1BbUjZYW-TV_1uIaCCTwKX_MQCIPKxsJr2iBhp8DjjMeL1eZ_sm1A3-CsAk-YFLyMZ5ogKP0Bb7qnWKRWuMtKXAcMDs6L-uyBA9xVsXw4mSFwOqVBPfrekjL38AC2mPPJ70QZLO7igwnTOm5gAb00jgfjn908NF4TVKMdOBS7OcXLNmKX4ORcVtzkEwOOKx3q2Z1ngHo6qKbhus"/>
+</div>
+</div>
+</header>
+<main class="flex-1 max-w-7xl mx-auto w-full p-4 md:p-6">
+<div class="flex items-center justify-between mb-4 mt-2">
+<div class="flex items-center gap-4 text-xs font-medium text-slate-500">
+<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-primary"></span> 42 Active</div>
+<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-500"></span> 7 Critical</div>
+<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> 156 Resolved</div>
+</div>
+<button class="bg-primary text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-primary/90 transition-colors">New Issue</button>
+</div>
+<div class="flex items-center justify-between mb-4 mt-2">
+<div class="flex items-center gap-4 text-xs font-medium text-slate-500">
+<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-primary"></span> 42 Active</div>
+<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-500"></span> 7 Critical</div>
+<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> 156 Resolved</div>
+</div>
+<button class="bg-primary text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-primary/90 transition-colors">New Issue</button>
+</div>
+<div class="flex items-center justify-between border-b border-white/5 pb-2 mb-0">
+<div class="flex gap-1 overflow-x-auto">
+<button class="px-3 py-1 text-xs font-medium text-slate-200 bg-white/10 rounded">All</button>
+<button class="px-3 py-1 text-xs font-medium text-slate-500 hover:text-slate-300">Critical</button>
+<button class="px-3 py-1 text-xs font-medium text-slate-500 hover:text-slate-300">Performance</button>
+<button class="px-3 py-1 text-xs font-medium text-slate-500 hover:text-slate-300">Security</button>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300">
+<span class="material-symbols-outlined text-[14px]">filter_list</span> Filter
+</button>
+<button class="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300">
+<span class="material-symbols-outlined text-[14px]">sort</span> Sort
+</button>
+</div>
+</div>
+<div class="divide-y divide-white/[0.04]">
+<div class="group flex items-center gap-4 py-2.5 px-2 hover:bg-white/[0.02] transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-red-500 text-[18px] shrink-0">error</span>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-3">
+<span class="text-[13px] font-medium text-slate-200 truncate">N+1 Query Detected in Product List</span>
+<span class="text-[11px] text-slate-500 font-mono">src/api/controllers/...:142</span>
+</div>
+</div>
+<div class="flex items-center gap-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-[11px] text-primary font-medium hover:underline">Resolve</button>
+<span class="material-symbols-outlined text-slate-600 text-[18px]">more_horiz</span>
+</div>
+</div>
+<div class="group flex items-center gap-4 py-2.5 px-2 hover:bg-white/[0.02] transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-amber-500 text-[18px] shrink-0">warning</span>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-3">
+<span class="text-[13px] font-medium text-slate-200 truncate">Unsanitized User Input in Search</span>
+<span class="text-[11px] text-slate-500 font-mono">src/ui/components/...:58</span>
+</div>
+</div>
+<div class="flex items-center gap-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-[11px] text-primary font-medium hover:underline">Resolve</button>
+<span class="material-symbols-outlined text-slate-600 text-[18px]">more_horiz</span>
+</div>
+</div>
+<div class="group flex items-center gap-4 py-2.5 px-2 hover:bg-white/[0.02] transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-blue-500 text-[18px] shrink-0">info</span>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-3">
+<span class="text-[13px] font-medium text-slate-200 truncate">Redundant Re-renders in Dashboard</span>
+<span class="text-[11px] text-slate-500 font-mono">src/ui/views/...:210</span>
+</div>
+</div>
+<div class="flex items-center gap-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-[11px] text-primary font-medium hover:underline">Resolve</button>
+<span class="material-symbols-outlined text-slate-600 text-[18px]">more_horiz</span>
+</div>
+</div>
+<div class="group flex items-center gap-4 py-2.5 px-2 hover:bg-white/[0.02] transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-blue-500 text-[18px] shrink-0">info</span>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-3">
+<span class="text-[13px] font-medium text-slate-200 truncate">Dead Code Found: authModuleLegacy.js</span>
+<span class="text-[11px] text-slate-500 font-mono">src/lib/legacy/...</span>
+</div>
+</div>
+<div class="flex items-center gap-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-[11px] text-primary font-medium hover:underline">Resolve</button>
+<span class="material-symbols-outlined text-slate-600 text-[18px]">more_horiz</span>
+</div>
+</div>
+</div>
+</main>
+<nav class="fixed bottom-0 w-full z-50 bg-[#0d0e12]/95 backdrop-blur-xl border-t border-white/5">
+<div class="flex justify-around items-center h-14 max-w-7xl mx-auto px-4">
+<a class="flex flex-col items-center gap-0.5 text-slate-500" href="#">
+<span class="material-symbols-outlined text-[22px]">dashboard</span>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 text-primary" href="#">
+<span class="material-symbols-outlined text-[22px] fill-[1]">adjust</span>
+<span class="text-[10px] font-medium">Issues</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 text-slate-500" href="#">
+<span class="material-symbols-outlined text-[22px]">history</span>
+<span class="text-[10px] font-medium">Inbox</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 text-slate-500" href="#">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</a>
+</div>
+</nav>
+</body></html>

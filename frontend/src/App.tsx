@@ -1,41 +1,23 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { useEffect } from 'react'
-import { supabase } from './lib/supabase'
-import { useAuthStore } from './stores/authStore'
+import { Routes, Route } from 'react-router-dom'
+import LandingPage from './pages/LandingPage'
 import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
-import IssuePage from './pages/IssuePage'
-import AgentViewer from './pages/AgentViewer'
-import AuthCallback from './pages/AuthCallback'
-import RepositorySettings from './pages/RepositorySettings'
-import PRPreview from './pages/PRPreview'
+import RepoSelector from './pages/RepoSelector'
+import AnalysisProgress from './pages/AnalysisProgress'
+import IssueSummary from './pages/IssueSummary'
+import FixPreview from './pages/FixPreview'
+import PRSuccess from './pages/PRSuccess'
 
 export default function App() {
-  const { user, setSession, setUser } = useAuthStore()
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session)
-      setUser(data.session?.user as any ?? null)
-    })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setUser(session?.user as any ?? null)
-    })
-    return () => subscription.unsubscribe()
-  }, [setSession, setUser])
-
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
+    <div className="min-h-screen bg-[#111921] text-slate-100 font-display">
       <Routes>
-        <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" />} />
-        <Route path="/repos/:repoId/settings" element={user ? <RepositorySettings /> : <Navigate to="/login" />} />
-        <Route path="/issues/:issueId" element={user ? <IssuePage /> : <Navigate to="/login" />} />
-        <Route path="/runs/:runId" element={user ? <AgentViewer /> : <Navigate to="/login" />} />
-        <Route path="/runs/:runId/pr" element={user ? <PRPreview /> : <Navigate to="/login" />} />
-        <Route path="*" element={<Navigate to={user ? '/dashboard' : '/login'} />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/repos" element={<RepoSelector />} />
+        <Route path="/analysis" element={<AnalysisProgress />} />
+        <Route path="/issues" element={<IssueSummary />} />
+        <Route path="/fix/:id" element={<FixPreview />} />
+        <Route path="/pr-success" element={<PRSuccess />} />
       </Routes>
     </div>
   )

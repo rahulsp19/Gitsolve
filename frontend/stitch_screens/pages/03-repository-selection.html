@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Repository Selector Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#248aeb",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111921",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="flex min-h-screen overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="hidden md:flex flex-col w-64 border-r border-slate-200 dark:border-primary/10 bg-white dark:bg-background-dark/50">
+<div class="p-6 border-b border-slate-200 dark:border-primary/10">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-primary rounded-lg text-white">
+<span class="material-symbols-outlined">terminal</span>
+</div>
+<span class="font-bold text-xl tracking-tight">GitLens AI</span>
+</div>
+</div>
+<nav class="flex-1 p-4 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-semibold" href="#">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/5 transition-colors" href="#">
+<span class="material-symbols-outlined">folder</span> Repositories
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/5 transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span> Analytics
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/5 transition-colors" href="#">
+<span class="material-symbols-outlined">history</span> Recent Activity
+                </a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-primary/10">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-primary/5 transition-colors text-slate-500 dark:text-slate-400" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+                </a>
+<div class="mt-4 flex items-center gap-3 px-4">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
+<img alt="User Avatar" data-alt="Profile avatar image for a developer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDMXZhb9mkB68A1LqBlZ4XZl6aOHObeHI39dRbaioEMx8X0MTzFHi4xAqvkUmnxbTYjRAvJ9H1MWzKH4bfr-gTJqz2E7EhdOFVnrtkzjicFL0t4xtDXTd22nMfgQaTh7Eahk-ocOKwpls6emxRDdhziHSV6XRsG4yt7fs-lbivii9nH8O6UAGikIljQGKEVZ_i_6qna5WGzDKOENm21wX42XvKYxOyHEqWseOtIRMxct3qwWqWo4_ia0mBfSnEirC2dClT7B4K39E"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-semibold truncate">Alex Dev</p>
+<p class="text-xs text-slate-500 truncate">Premium Plan</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col min-h-0 bg-background-light dark:bg-background-dark relative">
+<!-- Header -->
+<header class="flex items-center justify-between p-4 md:px-8 border-b border-slate-200 dark:border-primary/10 bg-white/50 dark:bg-background-dark/50 backdrop-blur-md sticky top-0 z-10">
+<div class="flex items-center gap-4">
+<button class="md:hidden text-slate-500">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="text-xl font-bold">Select Repository</h2>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span> New Repository
+                    </button>
+</div>
+</header>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-4 md:p-8">
+<!-- Search and Filters Section -->
+<div class="max-w-6xl mx-auto space-y-6">
+<div class="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
+<div class="flex-1 relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-12 pr-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-primary/20 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all" placeholder="Search your repositories (e.g. ecommerce-backend)..." type="text"/>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-primary/20 rounded-xl hover:bg-slate-50 dark:hover:bg-primary/5 transition-colors">
+<span class="material-symbols-outlined text-xl">filter_list</span>
+<span class="text-sm font-medium">Filter</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-primary/20 rounded-xl hover:bg-slate-50 dark:hover:bg-primary/5 transition-colors">
+<span class="material-symbols-outlined text-xl">sort</span>
+<span class="text-sm font-medium">Sort</span>
+</button>
+</div>
+</div>
+<!-- Repository Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="group bg-white dark:bg-background-dark border border-slate-200 dark:border-primary/10 p-6 rounded-xl hover:border-primary/50 dark:hover:border-primary/50 transition-all flex flex-col shadow-sm hover:shadow-md">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-slate-100 dark:bg-primary/10 rounded text-slate-600 dark:text-primary">
+<span class="material-symbols-outlined">folder_open</span>
+</div>
+<h3 class="font-bold text-lg group-hover:text-primary transition-colors">nexus-dashboard</h3>
+</div>
+<span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400">Public</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-6 line-clamp-2">Enterprise-grade React dashboard template with Tailwind CSS and Framer Motion integration.</p>
+<div class="mt-auto space-y-4">
+<div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-full bg-blue-500"></span>
+<span>TypeScript</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">star</span>
+<span>2.4k</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>2h ago</span>
+</div>
+</div>
+<button class="w-full py-2.5 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                                    Analyze Repository
+                                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group bg-white dark:bg-background-dark border border-slate-200 dark:border-primary/10 p-6 rounded-xl hover:border-primary/50 dark:hover:border-primary/50 transition-all flex flex-col shadow-sm hover:shadow-md">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-slate-100 dark:bg-primary/10 rounded text-slate-600 dark:text-primary">
+<span class="material-symbols-outlined">lock</span>
+</div>
+<h3 class="font-bold text-lg group-hover:text-primary transition-colors">auth-service-v2</h3>
+</div>
+<span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 dark:bg-primary/20 dark:text-slate-400">Private</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-6 line-clamp-2">Internal microservice for handling OAuth2 and user sessions across all platforms.</p>
+<div class="mt-auto space-y-4">
+<div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+<span>Go</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">star</span>
+<span>12</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>1d ago</span>
+</div>
+</div>
+<button class="w-full py-2.5 bg-primary/10 text-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                                    Analyze Repository
+                                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group bg-white dark:bg-background-dark border border-slate-200 dark:border-primary/10 p-6 rounded-xl hover:border-primary/50 dark:hover:border-primary/50 transition-all flex flex-col shadow-sm hover:shadow-md">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-slate-100 dark:bg-primary/10 rounded text-slate-600 dark:text-primary">
+<span class="material-symbols-outlined">folder_open</span>
+</div>
+<h3 class="font-bold text-lg group-hover:text-primary transition-colors">ml-data-pipeline</h3>
+</div>
+<span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400">Public</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-6 line-clamp-2">High-performance data ingestion pipeline built with Python and Apache Spark.</p>
+<div class="mt-auto space-y-4">
+<div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-full bg-blue-400"></span>
+<span>Python</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">star</span>
+<span>850</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>3d ago</span>
+</div>
+</div>
+<button class="w-full py-2.5 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                                    Analyze Repository
+                                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group bg-white dark:bg-background-dark border border-slate-200 dark:border-primary/10 p-6 rounded-xl hover:border-primary/50 dark:hover:border-primary/50 transition-all flex flex-col shadow-sm hover:shadow-md">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-slate-100 dark:bg-primary/10 rounded text-slate-600 dark:text-primary">
+<span class="material-symbols-outlined">folder_open</span>
+</div>
+<h3 class="font-bold text-lg group-hover:text-primary transition-colors">vector-search-engine</h3>
+</div>
+<span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400">Public</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-6 line-clamp-2">Scalable vector similarity search engine for AI-powered recommendation systems.</p>
+<div class="mt-auto space-y-4">
+<div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-full bg-orange-600"></span>
+<span>Rust</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">star</span>
+<span>4.1k</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>5h ago</span>
+</div>
+</div>
+<button class="w-full py-2.5 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                                    Analyze Repository
+                                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Empty State/Placeholder Card -->
+<div class="border-2 border-dashed border-slate-200 dark:border-primary/20 p-6 rounded-xl flex flex-col items-center justify-center text-center space-y-4 bg-slate-50/50 dark:bg-primary/5 group hover:border-primary transition-colors cursor-pointer">
+<div class="p-3 rounded-full bg-white dark:bg-background-dark shadow-sm group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl">add</span>
+</div>
+<div>
+<p class="font-semibold">Connect New Repository</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Import from GitHub, GitLab or Bitbucket</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Mobile Bottom Nav -->
+<nav class="md:hidden flex items-center justify-around bg-white dark:bg-background-dark border-t border-slate-200 dark:border-primary/10 p-3 pb-6">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-medium uppercase tracking-tight">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-[10px] font-medium uppercase tracking-tight">Explore</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="text-[10px] font-medium uppercase tracking-tight">Activity</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-[10px] font-medium uppercase tracking-tight">Profile</span>
+</a>
+</nav>
+</main>
+</div>
+</body></html>

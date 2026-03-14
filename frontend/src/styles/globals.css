@@ -3,8 +3,48 @@
 @tailwind utilities;
 
 @layer base {
-  body { @apply bg-slate-900 text-slate-100 font-sans; }
+  body {
+    @apply bg-[#111921] text-slate-100 antialiased;
+    font-family: 'Inter', sans-serif;
+  }
   ::-webkit-scrollbar { @apply w-1.5; }
   ::-webkit-scrollbar-track { @apply bg-slate-800; }
   ::-webkit-scrollbar-thumb { @apply bg-slate-600 rounded-full; }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-400;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes progress-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out forwards;
+}
+
+.animate-progress-pulse {
+  animation: progress-pulse 2s ease-in-out infinite;
+}
+
+.code-font {
+  font-family: 'JetBrains Mono', monospace;
 }

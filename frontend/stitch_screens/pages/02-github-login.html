@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#248aeb",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111921",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<title>Authentication | GitHub Connect</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Top Navigation / Header -->
+<header class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-primary rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-white">terminal</span>
+</div>
+<span class="font-bold text-xl tracking-tight">DevFlow</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-sm text-slate-500 dark:text-slate-400">Help</span>
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-400">help</span>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex items-center justify-center p-4">
+<div class="max-w-md w-full bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl overflow-hidden">
+<!-- Hero Image/Visual -->
+<div class="relative h-48 w-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 opacity-20 bg-gradient-to-br from-primary to-transparent" data-alt="Abstract technical circuit pattern blue gradient"></div>
+<div class="relative z-10 flex items-center gap-6">
+<div class="w-16 h-16 rounded-full bg-white dark:bg-slate-900 flex items-center justify-center shadow-lg border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-primary text-4xl">lock</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-slate-400 animate-pulse"></span>
+<span class="w-2 h-2 rounded-full bg-slate-400 animate-pulse delay-75"></span>
+<span class="w-2 h-2 rounded-full bg-slate-400 animate-pulse delay-150"></span>
+</div>
+<div class="w-16 h-16 rounded-full bg-white dark:bg-slate-900 flex items-center justify-center shadow-lg border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-slate-900 dark:text-white text-4xl">code</span>
+</div>
+</div>
+</div>
+<div class="p-8">
+<!-- Title & Description -->
+<div class="text-center mb-8">
+<h1 class="text-2xl font-bold mb-3 text-slate-900 dark:text-white">Connect your GitHub account</h1>
+<p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                        This application requires read access to your repositories and permission to create pull requests on your behalf to automate your workflow.
+                    </p>
+</div>
+<!-- Actions -->
+<div class="space-y-4">
+<button class="w-full flex items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+<svg class="w-5 h-5 fill-current" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.43.372.823 1.102.823 2.222 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path>
+</svg>
+                        Login with GitHub
+                    </button>
+<div class="relative flex items-center justify-center py-2">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-slate-200 dark:border-slate-800"></div>
+</div>
+<span class="relative px-4 bg-white dark:bg-slate-900 text-xs text-slate-500 uppercase tracking-widest">or continue with</span>
+</div>
+<button class="w-full flex items-center justify-center gap-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-medium py-3 px-4 rounded-lg transition-colors border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-xl">mail</span>
+                        Login with Email
+                    </button>
+</div>
+<!-- Footer Note -->
+<p class="mt-8 text-center text-xs text-slate-500 dark:text-slate-500">
+                    By connecting, you agree to our 
+                    <a class="underline hover:text-primary" href="#">Terms of Service</a> and 
+                    <a class="underline hover:text-primary" href="#">Privacy Policy</a>.
+                </p>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Component Reference) -->
+<nav class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pb-6 pt-3 flex justify-around items-center">
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined text-[24px] fill-1">shield</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Auth</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Settings</span>
+</a>
+</nav>
+</body></html>
