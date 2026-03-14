@@ -13,6 +13,9 @@ export default function RepoSelector() {
   
   const [showFilter, setShowFilter] = useState(false)
   const [showSort, setShowSort] = useState(false)
+  const [showNewRepoModal, setShowNewRepoModal] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true)
 
   let filtered = mockRepositories.filter(r =>
     r.full_name.toLowerCase().includes(search.toLowerCase())
@@ -66,22 +69,24 @@ export default function RepoSelector() {
             </button>
           ))}
         </nav>
-        <div className="p-4 border-t border-primary/10">
-          <button 
-             onClick={() => setActiveTab('Settings')}
-             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                activeTab === 'Settings' ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-primary/5 text-slate-400'
-             }`}>
-            <span className="material-symbols-outlined">settings</span>Settings
-          </button>
-          <div className="mt-4 flex items-center gap-3 px-4">
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">A</div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate text-white">Alex Dev</p>
-              <p className="text-xs text-slate-500 truncate">Premium Plan</p>
-            </div>
+        <button 
+          onClick={() => setActiveTab('Settings')}
+          className="p-4 border-t border-primary/10 w-full text-left hover:bg-primary/5 transition-colors cursor-pointer block"
+        >
+          <div className="flex items-center gap-3 w-full px-4 text-slate-400 hover:text-white transition-colors">
+            <span className="material-symbols-outlined font-medium">settings</span>
+            <span className="font-medium">Settings</span>
           </div>
-        </div>
+        </button>
+        <Link 
+          to="/"
+          className="p-4 pb-6 w-full text-left hover:bg-red-500/5 transition-colors cursor-pointer block group"
+        >
+          <div className="flex items-center gap-3 w-full px-4 text-slate-400 group-hover:text-red-400 transition-colors">
+            <span className="material-symbols-outlined font-medium">logout</span>
+            <span className="font-medium">Log Out</span>
+          </div>
+        </Link>
       </aside>
 
       {/* Main Content */}
@@ -95,15 +100,46 @@ export default function RepoSelector() {
             <h2 className="text-xl font-bold text-white">{activeTab}</h2>
           </div>
           <div className="flex items-center gap-4">
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="p-2 text-slate-500 hover:text-primary transition-colors relative"
+              >
+                <span className="material-symbols-outlined">notifications</span>
+                {hasUnreadNotifications && <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>}
+              </button>
+              
+              {showNotifications && (
+                <div className="absolute top-full mt-2 right-0 w-80 bg-[#161b22] border border-primary/20 rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in">
+                  <div className="p-4 border-b border-primary/10 flex justify-between items-center bg-[#111921]">
+                    <h4 className="font-bold text-white text-sm">Notifications</h4>
+                    {hasUnreadNotifications && (
+                      <button onClick={() => setHasUnreadNotifications(false)} className="text-xs text-primary hover:text-primary/80 transition-colors">Mark all read</button>
+                    )}
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {[
+                      { title: 'Action Required', detail: 'Review PR #442 for nexus-dashboard', time: '10m ago', unread: hasUnreadNotifications },
+                      { title: 'Analysis Complete', detail: 'Found 3 critical issues in ecommerce-api', time: '1h ago', unread: hasUnreadNotifications },
+                      { title: 'Agent Deployed', detail: 'GitSolve began working on Issue #21', time: '5h ago', unread: false }
+                    ].map((n, i) => (
+                      <div key={i} className={`p-4 border-b border-primary/5 hover:bg-primary/5 transition-colors cursor-pointer ${n.unread ? 'bg-primary/5' : ''}`}>
+                        <div className="flex justify-between items-start mb-1">
+                          <p className={`text-sm font-semibold ${n.unread ? 'text-white' : 'text-slate-300'}`}>{n.title}</p>
+                          <span className="text-xs text-slate-500">{n.time}</span>
+                        </div>
+                        <p className="text-xs text-slate-400">{n.detail}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="p-3 bg-[#111921] border-t border-primary/10 text-center">
+                    <button onClick={() => { setShowNotifications(false); setActiveTab('Recent Activity'); }} className="text-xs font-semibold text-slate-400 hover:text-primary transition-colors">View all activity</button>
+                  </div>
+                </div>
+              )}
+            </div>
             <button 
-              onClick={() => alert("You have 3 new alerts regarding your repositories.")}
-              className="p-2 text-slate-500 hover:text-primary transition-colors relative"
-            >
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-            <button 
-              onClick={() => alert("Opening 'Connect New Repository' dialog...")}
+              onClick={() => setShowNewRepoModal(true)}
               className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-lg shadow-primary/20"
             >
               <span className="material-symbols-outlined text-sm">add</span>New Repository
@@ -212,7 +248,7 @@ export default function RepoSelector() {
 
                 {/* Connect New Repo Card */}
                 <button 
-                  onClick={() => alert("Opening 'Connect New Repository' dialog...")}
+                  onClick={() => setShowNewRepoModal(true)}
                   className="border-2 border-dashed border-primary/20 p-6 rounded-xl flex flex-col items-center justify-center text-center space-y-4 bg-primary/5 group hover:border-primary transition-colors cursor-pointer"
                 >
                   <div className="p-3 rounded-full bg-[#111921] shadow-sm group-hover:text-primary transition-colors">
@@ -331,24 +367,99 @@ export default function RepoSelector() {
                   ))}
                 </div>
              </div>
+          ) : activeTab === 'Settings' ? (
+            <div className="max-w-4xl mx-auto space-y-8 animate-fade-in py-4">
+              <div className="flex items-center justify-between mb-8 border-b border-primary/10 pb-6">
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-1">Settings</h3>
+                  <p className="text-slate-400 text-sm">Manage your account and GitSolve preferences.</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="md:col-span-1 space-y-2">
+                  <h4 className="font-semibold text-white">Profile Settings</h4>
+                  <p className="text-sm text-slate-400">Update your personal information and email address.</p>
+                </div>
+                <div className="md:col-span-2 bg-[#111921] border border-primary/10 rounded-xl p-6 shadow-sm">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Display Name</label>
+                      <input type="text" defaultValue="Alex Dev" className="w-full bg-[#161b22] border border-primary/20 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-primary focus:outline-none transition-colors" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+                      <input type="email" defaultValue="alex@example.com" className="w-full bg-[#161b22] border border-primary/20 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-primary focus:outline-none transition-colors" />
+                    </div>
+                    <button className="bg-primary/20 text-primary hover:bg-primary hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Save Changes</button>
+                  </div>
+                </div>
+                <div className="col-span-1 md:col-span-3 border-t border-primary/10 my-4"></div>
+                <div className="md:col-span-1 space-y-2">
+                  <h4 className="font-semibold text-white">Connected Accounts</h4>
+                  <p className="text-sm text-slate-400">Manage your connected source control providers.</p>
+                </div>
+                <div className="md:col-span-2 bg-[#111921] border border-primary/10 rounded-xl p-6 shadow-sm">
+                  <div className="flex items-center justify-between p-4 bg-[#161b22] border border-primary/20 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>
+                      <div>
+                        <p className="font-semibold text-white">GitHub</p>
+                        <p className="text-xs text-slate-400">Connected as @alexdev</p>
+                      </div>
+                    </div>
+                    <button className="text-sm bg-[#111921] border border-primary/20 text-slate-300 px-3 py-1.5 rounded-lg hover:border-primary/50 transition-colors">Disconnect</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center max-w-md mx-auto animate-fade-in">
               <span className="material-symbols-outlined text-6xl text-primary/40 mb-6 border-4 border-primary/20 rounded-full p-6 bg-primary/5">
-                settings
+                error
               </span>
-              <h2 className="text-2xl font-bold text-white mb-2">{activeTab}</h2>
-              <p className="text-slate-400 mb-8 leading-relaxed">
-                This section is currently under construction. Check back soon for detailed settings related to your GitSolve projects.
-              </p>
+              <h2 className="text-2xl font-bold text-white mb-2">Page Not Found</h2>
               <button 
                 onClick={() => setActiveTab('Repositories')}
-                className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg shadow-primary/20"
+                className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg shadow-primary/20 mt-4"
               >
                 Back to Repositories
               </button>
             </div>
           )}
         </div>
+        
+        {/* New Repository Modal */}
+        {showNewRepoModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0b0f14]/80 backdrop-blur-sm animate-fade-in">
+            <div className="bg-[#111921] border border-primary/20 rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
+              <button 
+                onClick={() => setShowNewRepoModal(false)}
+                className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+              <h3 className="text-xl font-bold text-white mb-2">Connect Repository</h3>
+              <p className="text-slate-400 text-sm mb-6">Enter the URL of the repository you want to connect to GitSolve.</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Repository URL</label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">link</span>
+                    <input type="text" placeholder="https://github.com/username/repo" className="w-full bg-[#161b22] border border-primary/20 rounded-lg pl-10 pr-4 py-2 text-white focus:ring-2 focus:ring-primary focus:outline-none transition-colors" />
+                  </div>
+                </div>
+                <button 
+                  onClick={() => {
+                    setShowNewRepoModal(false);
+                  }}
+                  className="w-full bg-primary hover:bg-primary/90 text-white px-4 py-3 rounded-lg font-medium transition-colors"
+                >
+                  Connect Repository
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )
