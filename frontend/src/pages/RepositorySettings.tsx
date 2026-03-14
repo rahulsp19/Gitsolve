@@ -5,8 +5,8 @@ import { useRepoStore } from '@/stores/repoStore'
 export default function RepositorySettings() {
   const { repoId } = useParams<{ repoId: string }>()
   const { data: repos } = useRepositories()
-  const { mutate: connect, isPending } = useConnectRepository()
-  const { selectedRepo, setSelectedRepo } = useRepoStore()
+  useConnectRepository()
+  const { selectedRepo } = useRepoStore()
 
   const repo = repos?.find((r: { id: string }) => r.id === repoId) ?? selectedRepo
 

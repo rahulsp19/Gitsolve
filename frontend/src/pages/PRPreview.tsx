@@ -4,7 +4,7 @@ import { usePullRequest } from '@/hooks/usePullRequests'
 
 export default function PRPreview() {
   const { runId } = useParams<{ runId: string }>()
-  const { activeRun } = useAgentStore()
+  useAgentStore()
   const { data: pr, isLoading } = usePullRequest(runId)
 
   if (isLoading) return <div className="p-8 text-slate-400">Loading PR preview...</div>

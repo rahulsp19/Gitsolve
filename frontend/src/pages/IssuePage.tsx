@@ -5,7 +5,7 @@ import { useAgentStore } from '@/stores/agentStore'
 
 export default function IssuePage() {
   const { issueId } = useParams<{ issueId: string }>()
-  const { data: runs } = useAgentRuns(issueId)
+  useAgentRuns(issueId)
   const { mutate: resolve, isPending } = useResolveIssue()
   const { activeRun } = useAgentStore()
   useRealtimeRun(activeRun?.id ?? null)
