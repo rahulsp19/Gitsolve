@@ -11,10 +11,22 @@ export async function resolveIssue(issueId: string): Promise<{ run_id: string }>
 
 /** Connect a GitHub repository */
 export async function connectRepository(fullName: string): Promise<void> {
-  const { error } = await supabase.functions.invoke('connect-repository', {
+  const { error, data } = await supabase.functions.invoke('connect-repository', {
     body: { full_name: fullName },
   })
-  if (error) throw error
+  if (error) {
+    console.error("Function error detailed:", error)
+    if (error.context && typeof error.context.json === 'function') {
+      try {
+        const clonedContext = error.context.clone()
+        const errBody = await clonedContext.json()
+        throw new Error(errBody.error || errBody.message || error.message)
+      } catch (e) {
+        throw new Error(error.message || 'Unknown server error')
+      }
+    }
+    throw new Error(error.message || 'Network error or function unavailable')
+  }
 }
 
 /** Fetch agent steps for a run (used for polling fallback) */

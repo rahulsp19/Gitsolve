@@ -1,11 +1,21 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { mockRepositories, langColors } from '@/lib/mockData'
+import { Link, useNavigate } from 'react-router-dom'
+import { langColors } from '@/lib/mockData'
+import { useRepositories, useConnectRepository } from '@/hooks/useRepositories'
+import { useAvailableRepositories } from '@/hooks/useAvailableRepositories'
+import { useAuthStore } from '@/stores/authStore'
+import { useAnalysisStore } from '@/stores/analysisStore'
 
 type FilterType = 'all' | 'public' | 'private'
 type SortType = 'updated' | 'stars' | 'name'
 
 export default function RepoSelector() {
+  const { user } = useAuthStore()
+  const { data: repos = [], isLoading } = useRepositories()
+  const { data: availableRepos = [], isLoading: isLoadingAvailable } = useAvailableRepositories()
+  const { mutate: connectRepo, isPending: isConnecting } = useConnectRepository()
+  const { startAnalysis } = useAnalysisStore()
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [filterType, setFilterType] = useState<FilterType>('all')
   const [sortBy, setSortBy] = useState<SortType>('updated')
@@ -17,7 +27,7 @@ export default function RepoSelector() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true)
 
-  let filtered = mockRepositories.filter(r =>
+  let filtered = repos.filter(r =>
     r.full_name.toLowerCase().includes(search.toLowerCase())
   )
 
@@ -30,14 +40,33 @@ export default function RepoSelector() {
     if (sortBy === 'stars') return b.stars - a.stars
     
     // Sort logic for updated_at mock strings like "2h ago", "1d ago"
-    const parseTime = (t: string) => {
-      if (t.includes('h')) return parseInt(t) * 1
-      if (t.includes('d')) return parseInt(t) * 24
-      return 0
-    }
-    return parseTime(a.updated_at) - parseTime(b.updated_at)
-  })
+      const parseTime = (t: string | undefined) => {
+        if (!t) return 0
+        if (t.includes('h')) return parseInt(t) * 1
+        if (t.includes('d')) return parseInt(t) * 24
+        return 0
+      }
+      return parseTime(a.updated_at) - parseTime(b.updated_at)
+    })
 
+    const [repoUrlInput, setRepoUrlInput] = useState('')
+
+    const handleConnectClick = () => {
+      let repoName = repoUrlInput.trim()
+      if (repoName.startsWith('https://github.com/')) {
+        repoName = repoName.replace('https://github.com/', '')
+      }
+      if (repoName) {
+        connectRepo(repoName, {
+          onSuccess: () => {
+             setShowNewRepoModal(false)
+             setRepoUrlInput('')
+             alert(`Successfully connected ${repoName}`)
+          },
+          onError: (err: any) => alert(`Failed to connect: ${err.message || err.toString()}`)
+        })
+      }
+    }
   return (
     <div className="flex min-h-screen overflow-hidden bg-[#111921]">
       {/* Sidebar Navigation */}
@@ -235,13 +264,16 @@ export default function RepoSelector() {
                           <span>{repo.updated_at}</span>
                         </div>
                       </div>
-                      <Link
-                        to="/analysis"
+                      <button
+                        onClick={() => {
+                          startAnalysis(repo.full_name)
+                          navigate('/analysis')
+                        }}
                         className="w-full py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-lg font-semibold hover:bg-primary hover:text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                       >
                         Analyze Repository
                         <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -290,8 +322,8 @@ export default function RepoSelector() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                  { label: "Total Repos", value: mockRepositories.length, icon: 'folder', change: "+2 this month", up: true },
-                  { label: "Total Stars", value: mockRepositories.reduce((acc, r) => acc + r.stars, 0).toLocaleString(), icon: 'star', change: "+140 this week", up: true },
+                  { label: "Total Repos", value: repos.length, icon: 'folder', change: "+2 this month", up: true },
+                  { label: "Total Stars", value: repos.reduce((acc, r) => acc + r.stars, 0).toLocaleString(), icon: 'star', change: "+140 this week", up: true },
                   { label: "Issues Resolved", value: "324", icon: 'task_alt', change: "+12% vs last month", up: true },
                   { label: "AI Scans Run", value: "1,208", icon: 'robot_2', change: "+8% vs last month", up: true },
                 ].map((stat, i) => (
@@ -384,11 +416,11 @@ export default function RepoSelector() {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Display Name</label>
-                      <input type="text" defaultValue="Alex Dev" className="w-full bg-[#161b22] border border-primary/20 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-primary focus:outline-none transition-colors" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
-                      <input type="email" defaultValue="alex@example.com" className="w-full bg-[#161b22] border border-primary/20 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-primary focus:outline-none transition-colors" />
+                        <input type="text" defaultValue={user?.login || 'User'} className="w-full bg-[#161b22] border border-primary/20 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-primary focus:outline-none transition-colors" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+                        <input type="email" defaultValue={user?.email || ''} className="w-full bg-[#161b22] border border-primary/20 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-primary focus:outline-none transition-colors" />
                     </div>
                     <button className="bg-primary/20 text-primary hover:bg-primary hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Save Changes</button>
                   </div>
@@ -404,7 +436,7 @@ export default function RepoSelector() {
                       <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>
                       <div>
                         <p className="font-semibold text-white">GitHub</p>
-                        <p className="text-xs text-slate-400">Connected as @alexdev</p>
+                          <p className="text-xs text-slate-400">Connected as @{user?.login || 'user'}</p>
                       </div>
                     </div>
                     <button className="text-sm bg-[#111921] border border-primary/20 text-slate-300 px-3 py-1.5 rounded-lg hover:border-primary/50 transition-colors">Disconnect</button>
@@ -442,19 +474,24 @@ export default function RepoSelector() {
               <p className="text-slate-400 text-sm mb-6">Enter the URL of the repository you want to connect to GitSolve.</p>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Repository URL</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Repository URL or Name (owner/repo)</label>
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">link</span>
-                    <input type="text" placeholder="https://github.com/username/repo" className="w-full bg-[#161b22] border border-primary/20 rounded-lg pl-10 pr-4 py-2 text-white focus:ring-2 focus:ring-primary focus:outline-none transition-colors" />
+                    <input 
+                      type="text" 
+                      placeholder="https://github.com/username/repo or username/repo" 
+                      value={repoUrlInput}
+                      onChange={(e) => setRepoUrlInput(e.target.value)}
+                      className="w-full bg-[#161b22] border border-primary/20 rounded-lg pl-10 pr-4 py-2 text-white focus:ring-2 focus:ring-primary focus:outline-none transition-colors" 
+                    />
                   </div>
                 </div>
                 <button 
-                  onClick={() => {
-                    setShowNewRepoModal(false);
-                  }}
-                  className="w-full bg-primary hover:bg-primary/90 text-white px-4 py-3 rounded-lg font-medium transition-colors"
+                  onClick={handleConnectClick}
+                  disabled={isConnecting}
+                  className="w-full bg-primary hover:bg-primary/90 text-white px-4 py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
                 >
-                  Connect Repository
+                  {isConnecting ? 'Connecting...' : 'Connect Repository'}
                 </button>
               </div>
             </div>
@@ -464,3 +501,8 @@ export default function RepoSelector() {
     </div>
   )
 }
+
+
+
+
+

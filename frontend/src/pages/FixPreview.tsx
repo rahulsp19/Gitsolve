@@ -1,18 +1,44 @@
-import { Link } from 'react-router-dom'
-
-const diffLines = [
-  { type: 'context', old: 39, new: 39, content: '  export async function getSession(id: string) {' },
-  { type: 'context', old: 40, new: 40, content: '    try {' },
-  { type: 'removed', old: 41, new: null, content: "    const user = await db.query(`SELECT * FROM users WHERE id = '${id}'`);" },
-  { type: 'removed', old: 42, new: null, content: '    return user[0];' },
-  { type: 'added', old: null, new: 41, content: '    const user = await db.user.findUnique({' },
-  { type: 'added', old: null, new: 42, content: '      where: { id: id },' },
-  { type: 'added', old: null, new: 43, content: '    });' },
-  { type: 'added', old: null, new: 44, content: '    return user;' },
-  { type: 'context', old: 43, new: 45, content: '    } catch (e) {' },
-]
+import { useEffect } from 'react'
+import { Link, useParams, useNavigate } from 'react-router-dom'
+import { useAnalysisStore } from '@/stores/analysisStore'
 
 export default function FixPreview() {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const { issues, currentFix, fixLoading, resolveIssue, createPR, prLoading, prResult, repoUrl } = useAnalysisStore()
+
+  const issue = issues.find(i => i.id === id)
+
+  // Auto-trigger fix generation on mount
+  useEffect(() => {
+    if (issue && !currentFix && !fixLoading) {
+      resolveIssue(issue)
+    }
+  }, [issue?.id])
+
+  // Navigate to PR success page when PR is created
+  useEffect(() => {
+    if (prResult) {
+      navigate('/pr-success')
+    }
+  }, [prResult, navigate])
+
+  if (!issue) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0d1117]">
+        <div className="text-center">
+          <span className="material-symbols-outlined text-6xl text-slate-700 mb-4 block">error</span>
+          <h2 className="text-xl font-bold text-white mb-2">Issue Not Found</h2>
+          <p className="text-slate-400 mb-4">The issue may have been resolved or doesn't exist.</p>
+          <Link to="/issues" className="text-primary hover:text-primary/80 font-medium">← Back to Issues</Link>
+        </div>
+      </div>
+    )
+  }
+
+  // Parse diff lines from original and fixed code
+  const diffLines = buildDiffLines(currentFix?.originalCode || '', currentFix?.fixedCode || '')
+
   return (
     <div className="min-h-screen flex flex-col bg-[#0d1117]">
       {/* Header */}
@@ -23,22 +49,27 @@ export default function FixPreview() {
               <span className="material-symbols-outlined">arrow_back</span>
             </Link>
             <div>
-              <h1 className="text-sm font-semibold text-slate-400">PR #443</h1>
-              <h2 className="text-lg font-bold leading-tight">Fix: Security vulnerability in auth.ts</h2>
+              <h1 className="text-sm font-semibold text-slate-400">AI Fix Preview</h1>
+              <h2 className="text-lg font-bold leading-tight">{issue.title}</h2>
             </div>
           </div>
           <div className="flex gap-3">
-            <button className="px-4 py-2 rounded-lg border border-primary/30 text-primary font-medium hover:bg-primary/10 transition-colors flex items-center gap-2">
+            <button
+              onClick={() => resolveIssue(issue)}
+              disabled={fixLoading}
+              className="px-4 py-2 rounded-lg border border-primary/30 text-primary font-medium hover:bg-primary/10 transition-colors flex items-center gap-2 disabled:opacity-50"
+            >
               <span className="material-symbols-outlined text-[20px]">refresh</span>
               Regenerate Fix
             </button>
-            <Link
-              to="/pr-success"
-              className="px-4 py-2 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 transition-shadow shadow-lg shadow-primary/20 flex items-center gap-2"
+            <button
+              onClick={() => issue && createPR(issue)}
+              disabled={!currentFix || prLoading}
+              className="px-4 py-2 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 transition-shadow shadow-lg shadow-primary/20 flex items-center gap-2 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[20px]">call_merge</span>
-              Create Pull Request
-            </Link>
+              {prLoading ? 'Creating PR...' : 'Create Pull Request'}
+            </button>
           </div>
         </div>
       </header>
@@ -46,50 +77,62 @@ export default function FixPreview() {
       <main className="flex-1 max-w-7xl mx-auto w-full p-4 grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
         {/* Left Column: Diff Viewer */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="rounded-xl border border-primary/20 bg-[#161b22] overflow-hidden shadow-sm">
-            {/* File Header */}
-            <div className="bg-[#0d1117] px-4 py-3 border-b border-primary/20 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-slate-400 text-[20px]">description</span>
-                <span className="code-font text-sm font-medium">src/lib/auth/session.ts</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium px-2 py-0.5 rounded bg-red-500/10 text-red-500">-2</span>
-                <span className="text-xs font-medium px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500">+4</span>
-              </div>
+          {fixLoading ? (
+            <div className="rounded-xl border border-primary/20 bg-[#161b22] p-12 text-center">
+              <span className="material-symbols-outlined text-primary text-5xl animate-spin mb-4 block">smart_toy</span>
+              <h3 className="text-lg font-bold text-white mb-2">Generating AI Fix...</h3>
+              <p className="text-slate-400 text-sm">Analyzing the issue and generating optimized code fix</p>
             </div>
+          ) : currentFix ? (
+            <div className="rounded-xl border border-primary/20 bg-[#161b22] overflow-hidden shadow-sm">
+              {/* File Header */}
+              <div className="bg-[#0d1117] px-4 py-3 border-b border-primary/20 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-slate-400 text-[20px]">description</span>
+                  <span className="code-font text-sm font-medium">{issue.file}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500">
+                    Confidence: {Math.round((currentFix.confidence || 0.85) * 100)}%
+                  </span>
+                </div>
+              </div>
 
-            {/* Diff Content */}
-            <div className="code-font text-[13px] leading-relaxed overflow-x-auto">
-              {diffLines.map((line, i) => {
-                if (line.type === 'removed') {
+              {/* Diff Content */}
+              <div className="code-font text-[13px] leading-relaxed overflow-x-auto">
+                {diffLines.map((line, i) => {
+                  if (line.type === 'removed') {
+                    return (
+                      <div key={i} className="flex bg-red-500/10 border-l-4 border-red-500/50">
+                        <div className="w-12 flex-shrink-0 text-right pr-4 text-red-500/60 select-none bg-red-500/5">{line.lineNum}</div>
+                        <div className="px-4 text-red-200"><span className="select-none mr-2">-</span>{line.content}</div>
+                      </div>
+                    )
+                  }
+                  if (line.type === 'added') {
+                    return (
+                      <div key={i} className="flex bg-emerald-500/10 border-l-4 border-emerald-500/50">
+                        <div className="w-12 flex-shrink-0 text-right pr-4 text-emerald-500/60 select-none bg-emerald-500/5">{line.lineNum}</div>
+                        <div className="px-4 text-emerald-200"><span className="select-none mr-2">+</span>{line.content}</div>
+                      </div>
+                    )
+                  }
                   return (
-                    <div key={i} className="flex bg-red-500/10 border-l-4 border-red-500/50">
-                      <div className="w-12 flex-shrink-0 text-right pr-4 text-red-500/60 select-none bg-red-500/5">{line.old}</div>
-                      <div className="w-12 flex-shrink-0 text-right pr-4 text-slate-500 select-none bg-red-500/5"></div>
-                      <div className="px-4 text-red-200"><span className="select-none mr-2">-</span>{line.content}</div>
+                    <div key={i} className="flex hover:bg-primary/5">
+                      <div className="w-12 flex-shrink-0 text-right pr-4 text-slate-500 select-none bg-white/5">{line.lineNum}</div>
+                      <div className="px-4 text-slate-400"> {line.content}</div>
                     </div>
                   )
-                }
-                if (line.type === 'added') {
-                  return (
-                    <div key={i} className="flex bg-emerald-500/10 border-l-4 border-emerald-500/50">
-                      <div className="w-12 flex-shrink-0 text-right pr-4 text-slate-500 select-none bg-emerald-500/5"></div>
-                      <div className="w-12 flex-shrink-0 text-right pr-4 text-emerald-500/60 select-none bg-emerald-500/5">{line.new}</div>
-                      <div className="px-4 text-emerald-200"><span className="select-none mr-2">+</span>{line.content}</div>
-                    </div>
-                  )
-                }
-                return (
-                  <div key={i} className="flex hover:bg-primary/5">
-                    <div className="w-12 flex-shrink-0 text-right pr-4 text-slate-500 select-none bg-white/5">{line.old}</div>
-                    <div className="w-12 flex-shrink-0 text-right pr-4 text-slate-500 select-none bg-white/5">{line.new}</div>
-                    <div className="px-4 text-slate-400">{line.content}</div>
-                  </div>
-                )
-              })}
+                })}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="rounded-xl border border-slate-800 bg-[#161b22] p-12 text-center">
+              <span className="material-symbols-outlined text-slate-600 text-5xl mb-4 block">code</span>
+              <h3 className="text-lg font-bold text-white mb-2">No Fix Generated Yet</h3>
+              <p className="text-slate-400 text-sm">Click "Regenerate Fix" to start</p>
+            </div>
+          )}
         </div>
 
         {/* Right Column: AI Explanation Panel */}
@@ -102,55 +145,109 @@ export default function FixPreview() {
               <h3 className="font-bold text-slate-100">AI Explanation</h3>
             </div>
             <p className="text-sm leading-relaxed text-slate-300">
-              I detected a potential <span className="text-primary font-semibold">SQL Injection</span> vulnerability on line 41. The original code was using string interpolation for database queries, which is unsafe.
+              {currentFix?.explanation || (fixLoading ? 'Generating explanation...' : `Detected a potential ${issue.type} issue in ${issue.file}. ${issue.description}`)}
             </p>
-            <div className="space-y-3">
-              {[
-                'Migrated to Prisma ORM for type-safe queries.',
-                'Implemented automatic parameter sanitization.',
-                'Fixed edge case where user could be undefined.',
-              ].map((item, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <span className="material-symbols-outlined text-emerald-500 text-[20px]">check_circle</span>
-                  <p className="text-xs text-slate-400">{item}</p>
-                </div>
-              ))}
-            </div>
-            <hr className="border-primary/20" />
-            <div className="flex flex-col gap-2">
-              <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Confidence Score</span>
-              <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
-                <div className="bg-primary h-full w-[94%] rounded-full"></div>
+            {currentFix?.changes && currentFix.changes.length > 0 && (
+              <div className="space-y-3">
+                {currentFix.changes.map((item, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-emerald-500 text-[20px]">check_circle</span>
+                    <p className="text-xs text-slate-400">{item}</p>
+                  </div>
+                ))}
               </div>
-              <span className="text-xs text-right font-mono text-primary">94%</span>
-            </div>
+            )}
+            {currentFix && (
+              <>
+                <hr className="border-primary/20" />
+                <div className="flex flex-col gap-2">
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Confidence Score</span>
+                  <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
+                    <div className="bg-primary h-full rounded-full" style={{ width: `${(currentFix.confidence || 0.85) * 100}%` }}></div>
+                  </div>
+                  <span className="text-xs text-right font-mono text-primary">{Math.round((currentFix.confidence || 0.85) * 100)}%</span>
+                </div>
+              </>
+            )}
           </div>
 
-          {/* Quick Actions Card */}
+          {/* Issue Details Card */}
           <div className="rounded-xl border border-primary/20 bg-[#161b22] p-6">
             <h3 className="font-bold mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary">rate_review</span>
-              Quick Actions
+              <span className="material-symbols-outlined text-primary">info</span>
+              Issue Details
             </h3>
-            <div className="space-y-3">
-              {[
-                { title: 'Apply and Commit', desc: 'Fast-track to main branch', danger: false },
-                { title: 'Request Changes', desc: 'Modify the AI prompt', danger: false },
-                { title: 'Dismiss Fix', desc: 'Reject AI suggestions', danger: true },
-              ].map((action) => (
-                <button key={action.title} className={`w-full text-left px-4 py-3 rounded-lg border border-transparent transition-all group ${
-                  action.danger ? 'hover:bg-red-500/5 hover:border-red-500/20' : 'hover:bg-primary/5 hover:border-primary/20'
-                }`}>
-                  <div className={`text-sm font-semibold transition-colors ${
-                    action.danger ? 'group-hover:text-red-500' : 'group-hover:text-primary'
-                  }`}>{action.title}</div>
-                  <div className="text-xs text-slate-500">{action.desc}</div>
-                </button>
-              ))}
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-slate-400">Type</span>
+                <span className="text-white font-medium">{issue.type}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Severity</span>
+                <span className={`font-medium ${issue.severity === 'critical' ? 'text-red-400' : issue.severity === 'high' ? 'text-amber-400' : 'text-yellow-400'}`}>
+                  {issue.severity}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">File</span>
+                <code className="text-xs font-mono text-primary">{issue.file}</code>
+              </div>
+              {issue.line && (
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Line</span>
+                  <span className="text-white">{issue.line}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </main>
     </div>
   )
+}
+
+// ─── Diff Builder ──────────────────────────────────────────────────────────
+interface DiffLine {
+  type: 'context' | 'added' | 'removed'
+  content: string
+  lineNum: number
+}
+
+function buildDiffLines(original: string, fixed: string): DiffLine[] {
+  if (!original && !fixed) return []
+
+  const origLines = original.split('\n')
+  const fixedLines = fixed.split('\n')
+  const lines: DiffLine[] = []
+
+  // Simple diff: show removed lines, then added lines
+  // For a more sophisticated diff, we could use the 'diff' library
+  const maxLen = Math.max(origLines.length, fixedLines.length)
+
+  // If codes are the same, just show as context
+  if (original.trim() === fixed.trim()) {
+    origLines.forEach((line, i) => {
+      lines.push({ type: 'context', content: line, lineNum: i + 1 })
+    })
+    return lines
+  }
+
+  // Show original as removed
+  origLines.forEach((line, i) => {
+    if (line.trim()) {
+      lines.push({ type: 'removed', content: line, lineNum: i + 1 })
+    }
+  })
+
+  // Separator
+  lines.push({ type: 'context', content: '─'.repeat(40), lineNum: 0 })
+
+  // Show fixed as added
+  fixedLines.forEach((line, i) => {
+    if (line.trim()) {
+      lines.push({ type: 'added', content: line, lineNum: i + 1 })
+    }
+  })
+
+  return lines
 }

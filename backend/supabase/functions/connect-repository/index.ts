@@ -37,7 +37,14 @@ serve(async (req) => {
     )
 
     // Get authenticated user
-    const authHeader = req.headers.get('Authorization')!
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      console.error("Missing Authorization Header");
+      return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
     const { data: { user }, error: authError } = await supabase.auth.getUser(
       authHeader.replace('Bearer ', '')
     )
@@ -140,6 +147,36 @@ serve(async (req) => {
       const hookErr = await hookRes.text();
       console.warn("Failed to create webhook (non-fatal):", hookRes.status, hookErr);
     }
+    
+    // STEP 4 & 5 INITIALIZATION: Trigger Orchestrator Agent Pipeline
+    console.log("Triggering AI Orchestrator Pipeline for:", repoRecord.full_name);
+    
+    const { data: runData, error: runError } = await supabase
+      .from('agent_runs')
+      .insert({
+        repository_id: repoRecord.id,
+        status: 'pending',
+        started_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (!runError && runData) {
+      // Jumpstart orchestration pipeline asynchronously
+      fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/orchestrate-agents`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          run_id: runData.id,
+          repository_id: repoRecord.id 
+        })
+      }).catch(err => console.error("Failed to jumpstart orchestrator:", err));
+    } else if (runError) {
+      console.error("Failed to create agent_run:", runError);
+    }
 
     return new Response(
       JSON.stringify({ success: true, repository: repoRecord }),
@@ -149,6 +186,6 @@ serve(async (req) => {
     console.error("Fatal function error:", error);
     return new Response(JSON.stringify({ error: error.message || 'Internal Server Error' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    })
+    });
   }
 })
