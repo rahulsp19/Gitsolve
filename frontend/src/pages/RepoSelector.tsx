@@ -1,10 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
 import { langColors } from '@/lib/mockData'
 import { useRepositories, useConnectRepository } from '@/hooks/useRepositories'
 import { useAvailableRepositories } from '@/hooks/useAvailableRepositories'
+import { useRecentActivity } from '@/hooks/useRecentActivity'
+import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics'
+import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { useAuthStore } from '@/stores/authStore'
 import { useAnalysisStore } from '@/stores/analysisStore'
+import { useNotificationStore } from '@/stores/notificationStore'
 import { Logo } from '../components/Logo'
 
 type FilterType = 'all' | 'public' | 'private'
@@ -13,10 +19,36 @@ type SortType = 'updated' | 'stars' | 'name'
 export default function RepoSelector() {
   const { user } = useAuthStore()
   const { data: repos = [] } = useRepositories()
-  useAvailableRepositories()
+  const { data: ghRepos = [] } = useAvailableRepositories()
+  const { data: recentActivity = [], isLoading: isLoadingActivity } = useRecentActivity()
+  const { data: analyticsData } = useDashboardAnalytics()
   const { mutate: connectRepo, isPending: isConnecting } = useConnectRepository()
   const { startAnalysis } = useAnalysisStore()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  
+  useEffect(() => {
+    // Subscribe to changes in ai_activity_log table for real-time dashboard updates
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'ai_activity_log',
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['recent-activity'] })
+          queryClient.invalidateQueries({ queryKey: ['dashboard-analytics'] })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [queryClient])
   const [search, setSearch] = useState('')
   const [filterType, setFilterType] = useState<FilterType>('all')
   const [sortBy, setSortBy] = useState<SortType>('updated')
@@ -26,9 +58,25 @@ export default function RepoSelector() {
   const [showSort, setShowSort] = useState(false)
   const [showNewRepoModal, setShowNewRepoModal] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
-  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true)
+  
+  const { notifications, unreadCount, markAllAsRead, markAsRead } = useNotificationStore()
+  const hasUnreadNotifications = unreadCount > 0
 
-  let filtered = repos.filter(r =>
+  const enrichedRepos = repos.map(repo => {
+    const ghRepo = ghRepos.find((gr: any) => gr.full_name === repo.full_name)
+    return {
+      ...repo,
+      stars: ghRepo ? ghRepo.stargazers_count : (repo.stars || 0),
+      open_issues: ghRepo ? ghRepo.open_issues_count : 0,
+      visibility: ghRepo ? (ghRepo.private ? 'private' : 'public') : 'public',
+      updated_at_date: ghRepo ? new Date(ghRepo.updated_at) : new Date(repo.created_at),
+      updated_at_display: ghRepo ? new Date(ghRepo.updated_at).toLocaleDateString() : new Date(repo.created_at).toLocaleDateString(),
+      html_url: ghRepo ? ghRepo.html_url : `https://github.com/${repo.full_name}`,
+      description: ghRepo ? ghRepo.description : repo.description
+    }
+  })
+
+  let filtered = enrichedRepos.filter(r =>
     r.full_name.toLowerCase().includes(search.toLowerCase())
   )
 
@@ -39,16 +87,8 @@ export default function RepoSelector() {
   filtered.sort((a, b) => {
     if (sortBy === 'name') return a.full_name.localeCompare(b.full_name)
     if (sortBy === 'stars') return b.stars - a.stars
-    
-    // Sort logic for updated_at mock strings like "2h ago", "1d ago"
-      const parseTime = (t: string | undefined) => {
-        if (!t) return 0
-        if (t.includes('h')) return parseInt(t) * 1
-        if (t.includes('d')) return parseInt(t) * 24
-        return 0
-      }
-      return parseTime(a.updated_at) - parseTime(b.updated_at)
-    })
+    return b.updated_at_date.getTime() - a.updated_at_date.getTime()
+  })
 
     const [repoUrlInput, setRepoUrlInput] = useState('')
 
@@ -144,23 +184,29 @@ export default function RepoSelector() {
                   <div className="p-4 border-b border-primary/10 flex justify-between items-center bg-[#111921]">
                     <h4 className="font-bold text-white text-sm">Notifications</h4>
                     {hasUnreadNotifications && (
-                      <button onClick={() => setHasUnreadNotifications(false)} className="text-xs text-primary hover:text-primary/80 transition-colors">Mark all read</button>
+                      <button onClick={markAllAsRead} className="text-xs text-primary hover:text-primary/80 transition-colors">Mark all read</button>
                     )}
                   </div>
                   <div className="max-h-80 overflow-y-auto">
-                    {[
-                      { title: 'Action Required', detail: 'Review PR #442 for nexus-dashboard', time: '10m ago', unread: hasUnreadNotifications },
-                      { title: 'Analysis Complete', detail: 'Found 3 critical issues in ecommerce-api', time: '1h ago', unread: hasUnreadNotifications },
-                      { title: 'Agent Deployed', detail: 'GitSolve began working on Issue #21', time: '5h ago', unread: false }
-                    ].map((n, i) => (
-                      <div key={i} className={`p-4 border-b border-primary/5 hover:bg-primary/5 transition-colors cursor-pointer ${n.unread ? 'bg-primary/5' : ''}`}>
-                        <div className="flex justify-between items-start mb-1">
-                          <p className={`text-sm font-semibold ${n.unread ? 'text-white' : 'text-slate-300'}`}>{n.title}</p>
-                          <span className="text-xs text-slate-500">{n.time}</span>
+                    {notifications.length === 0 ? (
+                      <div className="p-4 text-center text-slate-500 text-sm">No notifications.</div>
+                    ) : (
+                      notifications.map((n) => (
+                        <div 
+                          key={n.id} 
+                          onClick={() => !n.read_status && markAsRead(n.id)}
+                          className={`p-4 border-b border-primary/5 hover:bg-primary/5 transition-colors cursor-pointer ${!n.read_status ? 'bg-primary/5' : ''}`}
+                        >
+                          <div className="flex justify-between items-start mb-1">
+                            <p className={`text-sm font-semibold ${!n.read_status ? 'text-white' : 'text-slate-300'}`}>
+                              {n.event_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                            </p>
+                            <span className="text-xs text-slate-500">{new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                          <p className="text-xs text-slate-400">{n.message}</p>
                         </div>
-                        <p className="text-xs text-slate-400">{n.detail}</p>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                   <div className="p-3 bg-[#111921] border-t border-primary/10 text-center">
                     <button onClick={() => { setShowNotifications(false); setActiveTab('Recent Activity'); }} className="text-xs font-semibold text-slate-400 hover:text-primary transition-colors">View all activity</button>
@@ -233,48 +279,64 @@ export default function RepoSelector() {
               {/* Repository Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filtered.map((repo) => (
-                  <div key={repo.id} className="group bg-[#111921] border border-primary/20 p-6 rounded-xl hover:border-primary/50 transition-all flex flex-col shadow-sm hover:shadow-md hover:shadow-primary/5">
+                  <div key={repo.id} className="group bg-[#111921] border border-primary/20 p-6 rounded-xl hover:border-primary/50 transition-all flex flex-col shadow-sm hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 duration-300 relative">
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                          <span className="material-symbols-outlined">{repo.visibility === 'private' ? 'lock' : 'folder_open'}</span>
+                          <span className="material-symbols-outlined">{repo.visibility === 'private' ? 'lock' : 'public'}</span>
                         </div>
                         <h3 className="font-bold text-lg text-white group-hover:text-primary transition-colors">{repo.full_name.split('/')[1]}</h3>
                       </div>
-                      <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
+                      <span className={`px-2 py-1 flex items-center gap-1 rounded text-[10px] font-bold uppercase tracking-wider ${
                         repo.visibility === 'public'
-                          ? 'bg-emerald-500/10 text-emerald-400'
-                          : 'bg-slate-800 text-slate-400'
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                          : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
                       }`}>
+                        <span className="material-symbols-outlined text-[12px]">{repo.visibility === 'public' ? 'public' : 'lock'}</span>
                         {repo.visibility}
                       </span>
                     </div>
-                    <p className="text-slate-400 text-sm mb-6 line-clamp-2">{repo.description}</p>
+                    <p className="text-slate-400 text-sm mb-6 line-clamp-2">{repo.description || "No description provided format for this repository."}</p>
                     <div className="mt-auto space-y-4">
                       <div className="flex items-center justify-between text-xs text-slate-400">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5" title="Language">
                           <span className="w-3 h-3 rounded-full" style={{ backgroundColor: langColors[repo.language] || '#888' }}></span>
-                          <span>{repo.language}</span>
+                          <span>{repo.language || 'Unknown'}</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-sm">star</span>
+                        <div className="flex items-center gap-1.5" title="Stars">
+                          <span className="material-symbols-outlined text-sm text-yellow-500">star</span>
                           <span>{repo.stars >= 1000 ? `${(repo.stars / 1000).toFixed(1)}k` : repo.stars}</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5" title="Open Issues">
+                          <span className="material-symbols-outlined text-sm text-red-400">bug_report</span>
+                          <span>{repo.open_issues}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5" title="Last Updated">
                           <span className="material-symbols-outlined text-sm">schedule</span>
-                          <span>{repo.updated_at}</span>
+                          <span>{repo.updated_at_display}</span>
                         </div>
                       </div>
-                      <button
-                        onClick={() => {
-                          startAnalysis(repo.full_name)
-                          navigate('/analysis')
-                        }}
-                        className="w-full py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-lg font-semibold hover:bg-primary hover:text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                      >
-                        Analyze Repository
-                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            startAnalysis(repo.full_name)
+                            navigate('/analysis')
+                          }}
+                          className="flex-1 py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-lg font-semibold hover:bg-primary hover:text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                        >
+                          Analyze Repository
+                          <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                        </button>
+                        <a
+                          href={repo.html_url}
+                          target="_blank"
+                          rel="noopener noreferrer" 
+                          className="px-3 py-2.5 bg-[#161b22] text-slate-300 border border-primary/20 rounded-lg hover:text-white hover:border-primary/50 transition-all flex items-center justify-center"
+                          title="Open on GitHub"
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>
+                        </a>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -323,10 +385,10 @@ export default function RepoSelector() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                  { label: "Total Repos", value: repos.length, icon: 'folder', change: "+2 this month", up: true },
-                  { label: "Total Stars", value: repos.reduce((acc, r) => acc + r.stars, 0).toLocaleString(), icon: 'star', change: "+140 this week", up: true },
-                  { label: "Issues Resolved", value: "324", icon: 'task_alt', change: "+12% vs last month", up: true },
-                  { label: "AI Scans Run", value: "1,208", icon: 'robot_2', change: "+8% vs last month", up: true },
+                  { label: "Total Repos", value: analyticsData?.stats?.total_repos || 0, icon: 'folder', change: "+1 recently", up: true },
+                  { label: "Total Stars", value: repos.reduce((acc, r) => acc + (ghRepos.find((gr: any) => gr.full_name === r.full_name)?.stargazers_count || r.stars || 0), 0).toLocaleString(), icon: 'star', change: "Updated live", up: true },
+                  { label: "Issues Resolved", value: analyticsData?.stats?.issues_resolved || 0, icon: 'task_alt', change: "Overall", up: true },
+                  { label: "AI Scans Run", value: analyticsData?.stats?.ai_scans_run || 0, icon: 'robot_2', change: "Overall", up: true },
                 ].map((stat, i) => (
                   <div key={i} className="bg-[#111921] border border-primary/10 rounded-xl p-6 shadow-sm hover:border-primary/30 transition-colors group">
                     <div className="flex justify-between items-start mb-4">
@@ -336,7 +398,7 @@ export default function RepoSelector() {
                       <h4 className="text-slate-400 text-sm font-medium mb-1">{stat.label}</h4>
                       <p className="text-3xl font-bold text-white mb-2">{stat.value}</p>
                       <p className={`text-xs flex items-center gap-1 ${stat.up ? 'text-emerald-400' : 'text-red-400'}`}>
-                        <span className="material-symbols-outlined text-[14px]">{stat.up ? 'trending_up' : 'trending_down'}</span>
+                        <span className="material-symbols-outlined text-[14px]">info</span>
                         {stat.change}
                       </p>
                     </div>
@@ -346,21 +408,59 @@ export default function RepoSelector() {
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                  <div className="bg-[#111921] border border-primary/10 rounded-xl p-6 shadow-sm min-h-[300px] flex flex-col hover:border-primary/30 transition-colors">
-                    <h4 className="font-semibold text-white mb-auto">Resolution Rate</h4>
-                    <div className="flex-1 flex items-center justify-center text-center text-slate-500">
-                      <div>
-                        <span className="material-symbols-outlined text-5xl mb-3 opacity-30">bar_chart</span>
-                        <p className="text-sm">Mock visualization placeholder</p>
-                      </div>
+                    <h4 className="font-semibold text-white mb-4">Resolution Rate</h4>
+                    <div className="flex-1 flex items-center justify-center text-center text-slate-500 w-full h-full">
+                      {(analyticsData?.stats?.issues_detected ?? 0) > 0 || (analyticsData?.stats?.issues_resolved ?? 0) > 0 ? (
+                        <ResponsiveContainer width="100%" height={250}>
+                          <BarChart data={[
+                            { name: 'Detected', count: analyticsData?.stats?.issues_detected || 0, fill: '#ef4444' },
+                            { name: 'Resolved', count: analyticsData?.stats?.issues_resolved || 0, fill: '#10b981' }
+                          ]}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                            <XAxis dataKey="name" stroke="#94a3b8" />
+                            <YAxis stroke="#94a3b8" />
+                            <RechartsTooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }} />
+                            <Bar dataKey="count" radius={[4, 4, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div>
+                          <span className="material-symbols-outlined text-5xl mb-3 opacity-30">bar_chart</span>
+                          <p className="text-sm">No issues data available</p>
+                        </div>
+                      )}
                     </div>
                  </div>
                  <div className="bg-[#111921] border border-primary/10 rounded-xl p-6 shadow-sm min-h-[300px] flex flex-col hover:border-primary/30 transition-colors">
-                    <h4 className="font-semibold text-white mb-auto">Issue Types Breakdown</h4>
-                    <div className="flex-1 flex items-center justify-center text-center text-slate-500">
-                      <div>
-                         <span className="material-symbols-outlined text-5xl mb-3 opacity-30">pie_chart</span>
-                         <p className="text-sm">Mock visualization placeholder</p>
-                      </div>
+                    <h4 className="font-semibold text-white mb-4">Issue Types Breakdown</h4>
+                    <div className="flex-1 flex items-center justify-center text-center text-slate-500 w-full h-full">
+                      {analyticsData?.issueBreakdown && analyticsData.issueBreakdown.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={250}>
+                          <PieChart>
+                            <Pie
+                              data={analyticsData.issueBreakdown}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={60}
+                              outerRadius={80}
+                              paddingAngle={5}
+                              dataKey="count"
+                              nameKey="classification"
+                            >
+                              {analyticsData.issueBreakdown.map((_entry: any, index: number) => {
+                                const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'];
+                                return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
+                              })}
+                            </Pie>
+                            <RechartsTooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div>
+                           <span className="material-symbols-outlined text-5xl mb-3 opacity-30">pie_chart</span>
+                           <p className="text-sm">No issue types available</p>
+                        </div>
+                      )}
                     </div>
                  </div>
               </div>
@@ -376,13 +476,11 @@ export default function RepoSelector() {
                 </div>
                 
                 <div className="relative border-l-2 border-primary/20 ml-4 space-y-8">
-                  {[
-                    { type: 'pr', title: 'GitSolve AI opened a Pull Request', repo: 'nexus-dashboard', time: '10 minutes ago', icon: 'merge', color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
-                    { type: 'scan_complete', title: 'Security Scan Completed', repo: 'auth-service-v2', time: '2 hours ago', icon: 'shield', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
-                    { type: 'issue', title: '3 new Critical Issues detected', repo: 'ml-data-pipeline', time: '5 hours ago', icon: 'bug_report', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' },
-                    { type: 'repo_added', title: 'Alex Dev connected a new repository', repo: 'mobile-app-ui', time: 'Yesterday', icon: 'add_link', color: 'text-primary', bg: 'bg-primary/10 border-primary/20' },
-                    { type: 'pr_merged', title: 'Alex Dev merged Pull Request #442', repo: 'nexus-dashboard', time: 'Yesterday', icon: 'check_circle', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
-                  ].map((activity, i) => (
+                  {isLoadingActivity ? (
+                    <div className="text-slate-500 pl-8">Loading activity feed...</div>
+                  ) : recentActivity.length === 0 ? (
+                    <div className="text-slate-500 pl-8">No recent activity found.</div>
+                  ) : recentActivity.map((activity: any, i: number) => (
                     <div key={i} className="pl-8 relative group">
                       <span className={`absolute -left-[17px] top-1 w-8 h-8 rounded-full border-2 flex items-center justify-center bg-[#111921] ${activity.bg} ${activity.color} transition-transform group-hover:scale-110`}>
                         <span className="material-symbols-outlined text-[16px]">{activity.icon}</span>
