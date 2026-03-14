@@ -174,7 +174,7 @@ No markdown outside the JSON, no explanations. Make sure it is valid JSON.`
         }
       ],
       temperature: 0.1,
-      max_tokens: 4000,
+      max_tokens: 16384,
       response_format: { type: 'json_object' }
     });
 
@@ -185,7 +185,19 @@ No markdown outside the JSON, no explanations. Make sure it is valid JSON.`
     try {
       // In case OpenRouter models return markdown blocks, strip them
       const cleaned = content.replace(/^```json/m, '').replace(/```$/m, '').trim();
-      parsed = JSON.parse(cleaned);
+      try {
+        parsed = JSON.parse(cleaned);
+      } catch (parseError) {
+        // Fallback for truncated JSON response due to output token limits
+        console.warn('JSON parsing failed, attempting to recover truncated response...');
+        const lastBrace = cleaned.lastIndexOf('}');
+        if (lastBrace > 0) {
+           const recovered = cleaned.substring(0, lastBrace + 1) + ']}';
+           parsed = JSON.parse(recovered);
+        } else {
+           throw parseError;
+        }
+      }
       const issues = parsed.issues || parsed.results || (Array.isArray(parsed) ? parsed : []);
       console.log(`Issues detected: ${issues.length}`);
       
