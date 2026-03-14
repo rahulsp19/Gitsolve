@@ -131,7 +131,7 @@ CREATE TABLE code_embeddings (
   end_line       INTEGER,
   language       TEXT,
   sha            TEXT,
-  embedding      vector(3072),
+  embedding      vector(768),
   metadata       JSONB,
   created_at     TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(repository_id, file_path, chunk_index)
@@ -189,14 +189,14 @@ CREATE TABLE learning_patterns (
   success_count   INTEGER DEFAULT 0,
   failure_count   INTEGER DEFAULT 0,
   avg_confidence  DECIMAL(5,4),
-  embedding       vector(3072),
+  embedding       vector(768),
   created_at      TIMESTAMPTZ DEFAULT NOW(),
   updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ─── VECTOR SEARCH FUNCTION ───────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION search_code_embeddings(
-  query_embedding vector(3072),
+  query_embedding vector(768),
   repo_id         UUID,
   match_count     INT DEFAULT 20
 )

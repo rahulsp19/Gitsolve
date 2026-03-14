@@ -7,6 +7,8 @@ import Dashboard from './pages/Dashboard'
 import IssuePage from './pages/IssuePage'
 import AgentViewer from './pages/AgentViewer'
 import AuthCallback from './pages/AuthCallback'
+import RepositorySettings from './pages/RepositorySettings'
+import PRPreview from './pages/PRPreview'
 
 export default function App() {
   const { user, setSession, setUser } = useAuthStore()
@@ -29,8 +31,10 @@ export default function App() {
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" />} />
+        <Route path="/repos/:repoId/settings" element={user ? <RepositorySettings /> : <Navigate to="/login" />} />
         <Route path="/issues/:issueId" element={user ? <IssuePage /> : <Navigate to="/login" />} />
         <Route path="/runs/:runId" element={user ? <AgentViewer /> : <Navigate to="/login" />} />
+        <Route path="/runs/:runId/pr" element={user ? <PRPreview /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to={user ? '/dashboard' : '/login'} />} />
       </Routes>
     </div>

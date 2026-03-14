@@ -1,13 +1,13 @@
 export const MODELS = {
-  /** Primary reasoning: complex planning and code generation */
-  PRIMARY: 'gpt-4o',
-  /** Long-context: large file comprehension */
-  LONG_CONTEXT: 'claude-sonnet-4-5',
-  /** Fast classification: issue type, severity */
+  /** Primary reasoning via Groq: complex planning and code generation */
+  PRIMARY: 'llama3-70b-8192',
+  /** Fast classification via Groq: issue type, severity */
   FAST: 'mixtral-8x7b-32768',
-  /** Embeddings */
-  EMBEDDING: 'text-embedding-3-large',
-  EMBEDDING_DIMS: 3072,
+  /** Code-specialized via OpenRouter: code generation tasks */
+  CODE: 'deepseek/deepseek-coder-33b-instruct',
+  /** Embeddings via Jina AI: code-optimized embeddings */
+  EMBEDDING: 'jina-embeddings-v2-base-code',
+  EMBEDDING_DIMS: 768,
 } as const
 
 export const AGENT_CONFIG = {
