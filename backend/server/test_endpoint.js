@@ -1,4 +1,3 @@
-const fs = require('fs');
 const url = 'http://localhost:3001/api/analyze';
 const data = { repoUrl: 'rahulsp19/Test_repo1' };
 
@@ -11,7 +10,11 @@ fetch(url, {
 })
   .then(response => response.json())
   .then(data => {
-    fs.writeFileSync('c:\\Users\\Rahul SP\\Gitsolve\\backend\\server\\test_res.json', JSON.stringify(data, null, 2));
-    console.log('Saved to test_res.json');
+    console.log("Graph Nodes:", data.graph?.nodes?.length);
+    console.log("Graph Edges:", data.graph?.edges?.length);
+    console.log("Reasoning Path length:", data.graph?.reasoning_path?.length);
+    if(data.graph) {
+         console.log(JSON.stringify(data.graph.nodes, null, 2));
+    }
   })
   .catch((error) => console.error('Error:', error));

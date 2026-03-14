@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAnalysisStore } from '@/stores/analysisStore'
+import { CodebaseGraph } from '@/components/CodebaseGraph'
 
 const severityConfig: Record<string, { bg: string; text: string; border: string }> = {
   critical: { bg: 'bg-red-500/10', text: 'text-red-500', border: 'border-red-500/20' },
@@ -11,7 +12,7 @@ const severityConfig: Record<string, { bg: string; text: string; border: string 
 }
 
 export default function IssueSummary() {
-  const { issues, repoName } = useAnalysisStore()
+  const { issues, repoName, graph } = useAnalysisStore()
   const [activeFilter, setActiveFilter] = useState('all')
 
   const criticalCount = issues.filter(i => i.severity === 'critical').length
@@ -157,6 +158,26 @@ export default function IssueSummary() {
                 )
               })}
             </div>
+
+            {/* Codebase Architecture Section */}
+            {graph && graph.nodes && graph.nodes.length > 0 && (
+              <div className="mt-10 mb-8">
+                <div className="rounded-xl border border-primary/30 bg-[#161b22] overflow-hidden shadow-2xl">
+                  <div className="bg-[#0d1117] px-6 py-4 border-b border-primary/20 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-primary text-[24px]">account_tree</span>
+                      <h3 className="text-lg font-bold text-white">Codebase Architecture</h3>
+                    </div>
+                    <span className="text-xs font-medium px-2 py-1 rounded bg-primary/20 text-primary border border-primary/30">
+                      Interactive Map
+                    </span>
+                  </div>
+                  <div className="p-2 bg-[#0a0f18]">
+                    <CodebaseGraph graphData={graph} />
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </main>

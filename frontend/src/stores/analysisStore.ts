@@ -58,6 +58,7 @@ interface AnalysisState {
   issues: AnalyzedIssue[]
   metrics: AnalysisMetrics
   agentSteps: AgentTimelineStep[]
+  graph: any // Stores the dependency graph and reasoning path
   error: string | null
   currentFix: FixResult | null
   fixLoading: boolean
@@ -88,6 +89,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
   issues: [],
   metrics: { filesScanned: 0, functionsAnalyzed: 0, issuesDetected: 0, securityRisks: 0 },
   agentSteps: [],
+  graph: null,
   error: null,
   currentFix: null,
   fixLoading: false,
@@ -106,7 +108,9 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
         { id: 's2', agent_name: 'code-understanding', status: 'pending', description: 'Waiting to download and parse code files...', step_order: 2 },
         { id: 's3', agent_name: 'validation', status: 'pending', description: 'Waiting to analyze code for vulnerabilities...', step_order: 3 },
         { id: 's4', agent_name: 'solution-planning', status: 'pending', description: 'Waiting to classify detected issues...', step_order: 4 },
+        { id: 's5', agent_name: 'architecture-mapping', status: 'pending', description: 'Waiting to map codebase dependencies...', step_order: 5 },
       ],
+      graph: null,
       error: null,
       currentFix: null,
       prResult: null,
@@ -143,6 +147,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
         issues: data.issues || [],
         metrics: data.metrics || { filesScanned: 0, functionsAnalyzed: 0, issuesDetected: 0, securityRisks: 0 },
         agentSteps: (data.agentSteps || []).map((s: any) => ({ ...s, status: 'success' })),
+        graph: data.graph || null,
         repoName: data.repoName || get().repoName,
       })
     } catch (err: any) {
@@ -217,6 +222,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
       issues: [],
       metrics: { filesScanned: 0, functionsAnalyzed: 0, issuesDetected: 0, securityRisks: 0 },
       agentSteps: [],
+      graph: null,
       error: null,
       currentFix: null,
       fixLoading: false,

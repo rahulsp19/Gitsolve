@@ -1,11 +1,12 @@
 import { useEffect } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useAnalysisStore } from '@/stores/analysisStore'
+import { CodebaseGraph } from '@/components/CodebaseGraph'
 
 export default function FixPreview() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { issues, currentFix, fixLoading, resolveIssue, createPR, prLoading, prResult } = useAnalysisStore()
+  const { issues, currentFix, fixLoading, resolveIssue, createPR, prLoading, prResult, graph } = useAnalysisStore()
 
   const issue = issues.find(i => i.id === id)
 
@@ -133,9 +134,7 @@ export default function FixPreview() {
               <p className="text-slate-400 text-sm">Click "Regenerate Fix" to start</p>
             </div>
           )}
-        </div>
-
-        {/* Right Column: AI Explanation Panel */}
+        </div>          {/* Right Column: AI Explanation Panel */}
         <div className="space-y-6">
           <div className="rounded-xl bg-primary/10 border border-primary/20 p-6 flex flex-col gap-4">
             <div className="flex items-center gap-3">
@@ -202,6 +201,24 @@ export default function FixPreview() {
           </div>
         </div>
       </main>
+
+      {/* Codebase Architecture Section */}
+      <div className="max-w-7xl mx-auto w-full px-4 pb-12">
+        <div className="rounded-xl border border-primary/30 bg-[#161b22] overflow-hidden shadow-2xl relative">
+          <div className="bg-[#0d1117] px-6 py-4 border-b border-primary/20 flex items-center justify-between">
+             <div className="flex items-center gap-3">
+               <span className="material-symbols-outlined text-primary text-[24px]">account_tree</span>
+               <h3 className="text-lg font-bold text-white">Codebase Architecture</h3>
+             </div>
+             <span className="text-xs font-medium px-2 py-1 rounded bg-primary/20 text-primary border border-primary/30">
+               Interactive Map
+             </span>
+          </div>
+          <div className="p-2 bg-[#0a0f18]">
+            <CodebaseGraph graphData={graph || {nodes: [], edges: [], reasoning_path: []}} />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
