@@ -154,7 +154,7 @@ export default function AnalysisProgress() {
             <h3 className="text-xl font-bold tracking-tight">AI Agent Timeline</h3>
             <span className="text-xs font-medium uppercase tracking-widest text-slate-500 px-2 py-1 bg-slate-800 rounded">Sequence View</span>
           </div>
-          <div className="relative space-y-6 pl-8 before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-gradient-to-b before:from-primary before:via-primary/50 before:to-slate-800">
+          <div className="relative space-y-6 pl-8 before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-gradient-to-b before:from-primary before:via-primary/50 before:to-slate-800 before:transition-colors before:duration-300 before:ease-in-out">
             {agentSteps.map((step) => {
               const isActive = step.status === 'running'
               const isDone = step.status === 'success'
@@ -163,9 +163,9 @@ export default function AnalysisProgress() {
               return (
                 <div key={step.id} className="relative">
                   {/* Timeline Node */}
-                  <div className={`absolute -left-4 top-4 flex items-center justify-center w-8 h-8 rounded-full border shadow shrink-0 ${
+                  <div className={`absolute -left-4 top-4 flex items-center justify-center w-8 h-8 rounded-full border shadow shrink-0 transition-colors duration-300 ease-in-out ${
                     isActive
-                      ? 'border-primary/20 bg-primary text-white border-4'
+                      ? 'border-primary/20 bg-primary text-white border-4 animate-pulse-ring'
                       : isDone
                         ? 'border-slate-700 bg-emerald-500 text-white'
                         : isFailed
@@ -175,7 +175,7 @@ export default function AnalysisProgress() {
                     {isActive ? (
                       <span className="material-symbols-outlined text-sm animate-spin">smart_toy</span>
                     ) : isDone ? (
-                      <span className="material-symbols-outlined text-sm">check</span>
+                      <span className="material-symbols-outlined text-sm animate-spring-pop">check</span>
                     ) : isFailed ? (
                       <span className="material-symbols-outlined text-sm">close</span>
                     ) : (

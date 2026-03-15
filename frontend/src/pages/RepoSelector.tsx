@@ -12,6 +12,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useAnalysisStore } from '@/stores/analysisStore'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { Logo } from '../components/Logo'
+import { toast } from 'sonner'
 
 type FilterType = 'all' | 'public' | 'private'
 type SortType = 'updated' | 'stars' | 'name'
@@ -102,9 +103,15 @@ export default function RepoSelector() {
           onSuccess: () => {
              setShowNewRepoModal(false)
              setRepoUrlInput('')
-             alert(`Successfully connected ${repoName}`)
+             toast.success(`Successfully connected ${repoName}`, {
+               duration: 3000,
+               className: 'bg-slate-800 text-white border-green-500/50',
+             })
           },
-          onError: (err: any) => alert(`Failed to connect: ${err.message || err.toString()}`)
+          onError: (err: any) => toast.error(`Failed to connect: ${err.message || err.toString()}`, {
+            duration: 3000,
+            className: 'bg-slate-800 text-white border-red-500/50',
+          })
         })
       }
     }
@@ -279,7 +286,7 @@ export default function RepoSelector() {
               {/* Repository Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filtered.map((repo) => (
-                  <div key={repo.id} className="group bg-[#111921] border border-primary/20 p-6 rounded-xl hover:border-primary/50 transition-all flex flex-col shadow-sm hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 duration-300 relative">
+                  <div key={repo.id} className="group bg-[#111921] border border-primary/20 p-6 rounded-xl hover:border-primary/50 transition-all duration-200 ease-out flex flex-col shadow-sm hover:shadow-[0_10px_20px_rgba(0,0,0,0.4)] hover:-translate-y-1 relative">
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -322,7 +329,7 @@ export default function RepoSelector() {
                             startAnalysis(repo.full_name)
                             navigate('/analysis')
                           }}
-                          className="flex-1 py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-lg font-semibold hover:bg-primary hover:text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                          className="flex-1 py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-lg font-semibold hover:bg-primary hover:text-white hover:brightness-110 transition-all duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center gap-2"
                         >
                           Analyze Repository
                           <span className="material-symbols-outlined text-sm">arrow_forward</span>

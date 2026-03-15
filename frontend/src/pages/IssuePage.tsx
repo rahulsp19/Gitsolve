@@ -16,7 +16,7 @@ export default function IssuePage() {
       <button
         onClick={() => issueId && resolve(issueId)}
         disabled={isPending}
-        className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 disabled:opacity-50"
+        className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 hover:brightness-110 transition-all duration-200 ease-out hover:-translate-y-0.5 disabled:opacity-50"
       >
         {isPending ? 'Resolving...' : 'Resolve with AI'}
       </button>

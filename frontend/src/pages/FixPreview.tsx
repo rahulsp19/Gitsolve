@@ -134,7 +134,9 @@ export default function FixPreview() {
               <p className="text-slate-400 text-sm">Click "Regenerate Fix" to start</p>
             </div>
           )}
-        </div>          {/* Right Column: AI Explanation Panel */}
+        </div>
+
+          {/* Right Column: AI Explanation Panel */}
         <div className="space-y-6">
           <div className="rounded-xl bg-primary/10 border border-primary/20 p-6 flex flex-col gap-4">
             <div className="flex items-center gap-3">

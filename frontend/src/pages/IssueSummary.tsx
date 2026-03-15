@@ -147,7 +147,7 @@ export default function IssueSummary() {
                       <div className="flex items-center gap-3 lg:self-center">
                         <Link
                           to={`/fix/${issue.id}`}
-                          className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-primary/20 transition-all"
+                          className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 hover:brightness-110 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-primary/20 transition-all duration-200 ease-out hover:-translate-y-0.5"
                         >
                           <span className="material-symbols-outlined text-[18px]">auto_fix_high</span>
                           Resolve with AI
