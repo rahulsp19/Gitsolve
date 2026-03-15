@@ -659,7 +659,103 @@ app.post('/api/create-pr', async (req, res) => {
   }
 });
 
+/** GET /api/references — Code examples from public GitHub repositories */
+app.get('/api/references', async (req, res) => {
+  try {
+    const { issue_type = '', language = 'javascript' } = req.query as { issue_type?: string; language?: string };
+
+    // Map common issue types to useful secure-code search keywords
+    const keywordMap: Record<string, string> = {
+      'sql_injection':        'parameterized query prepared statement',
+      'sql injection':        'parameterized query prepared statement',
+      'xss':                  'sanitize input escape html',
+      'cross-site scripting': 'sanitize input escape html',
+      'integer overflow':     'safe integer arithmetic bounds check',
+      'buffer overflow':      'bounds check safe buffer',
+      'hardcoded secret':     'environment variable secret config',
+      'authentication':       'jwt authentication token verify',
+      'rate limit':           'rate limiting throttle middleware',
+      'n+1 query':            'eager loading join query optimization',
+      'memory leak':          'memory cleanup dispose resource',
+      'command injection':    'shell escape sanitize subprocess',
+    };
+
+    const lowerType = issue_type.toLowerCase();
+    let keyword = keywordMap[lowerType] || '';
+
+    // Fuzzy match if no exact match
+    if (!keyword) {
+      for (const [key, val] of Object.entries(keywordMap)) {
+        if (lowerType.includes(key) || key.includes(lowerType.split(' ')[0])) {
+          keyword = val;
+          break;
+        }
+      }
+    }
+
+    if (!keyword) keyword = issue_type.replace(/_/g, ' ');
+
+    const query = encodeURIComponent(`${keyword} language:${language}`);
+    const githubSearchUrl = `https://api.github.com/search/code?q=${query}&per_page=5&sort=indexed`;
+
+    const searchRes = await fetch(githubSearchUrl, {
+      headers: {
+        Authorization: `Bearer ${GITHUB_TOKEN}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    });
+
+    if (!searchRes.ok) {
+      console.warn(`GitHub search failed: ${searchRes.status}`);
+      return res.json({ references: [] });
+    }
+
+    const searchData: any = await searchRes.json();
+    const items = (searchData.items || []).slice(0, 3);
+
+    const references = await Promise.all(
+      items.map(async (item: any) => {
+        const repoFull    = item.repository?.full_name || '';
+        const filePath    = item.path || '';
+        const htmlUrl     = item.html_url || `https://github.com/${repoFull}/blob/main/${filePath}`;
+
+        // Fetch a small snippet of the raw file
+        let snippet = '';
+        try {
+          const rawUrl = `https://raw.githubusercontent.com/${repoFull}/HEAD/${filePath}`;
+          const rawRes = await fetch(rawUrl, {
+            headers: { Authorization: `Bearer ${GITHUB_TOKEN}` },
+          });
+          if (rawRes.ok) {
+            const text = await rawRes.text();
+            // Return only first 20 non-empty lines as a preview snippet
+            snippet = text
+              .split('\n')
+              .filter(l => l.trim())
+              .slice(0, 20)
+              .join('\n');
+          }
+        } catch { /* Silently skip if file fetch fails */ }
+
+        return {
+          repo:    repoFull,
+          file:    filePath,
+          snippet: snippet || '# (Preview unavailable)',
+          url:     htmlUrl,
+        };
+      })
+    );
+
+    res.json({ references });
+  } catch (err: any) {
+    console.error('References error:', err);
+    res.json({ references: [] });
+  }
+});
+
 /** Health check */
+
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
