@@ -140,10 +140,19 @@ export default function FixPreview() {
         <div className="space-y-6">
           <div className="rounded-xl bg-primary/10 border border-primary/20 p-6 flex flex-col gap-4">
             <div className="flex items-center gap-3">
+              {/* GitSolve Logo */}
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
-                <span className="material-symbols-outlined text-white text-[20px]">psychology</span>
+                <svg width="18" height="18" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="60" cy="140" r="18" fill="white"/>
+                  <circle cx="100" cy="60" r="18" fill="white"/>
+                  <circle cx="140" cy="140" r="18" fill="white"/>
+                  <circle cx="100" cy="140" r="12" fill="white" opacity="0.7"/>
+                  <line x1="60" y1="140" x2="100" y2="60" stroke="white" strokeWidth="8" strokeLinecap="round"/>
+                  <line x1="100" y1="60" x2="140" y2="140" stroke="white" strokeWidth="8" strokeLinecap="round"/>
+                  <line x1="60" y1="140" x2="140" y2="140" stroke="white" strokeWidth="6" strokeLinecap="round" opacity="0.6"/>
+                </svg>
               </div>
-              <h3 className="font-bold text-slate-100">AI Explanation</h3>
+              <h3 className="font-bold text-slate-100">GitSolve Explanation</h3>
             </div>
             <p className="text-sm leading-relaxed text-slate-300">
               {currentFix?.explanation || (fixLoading ? 'Generating explanation...' : `Detected a potential ${issue.type} issue in ${issue.file}. ${issue.description}`)}
@@ -217,12 +226,52 @@ export default function FixPreview() {
              </span>
           </div>
           <div className="p-2 bg-[#0a0f18]">
-            <CodebaseGraph graphData={graph || {nodes: [], edges: [], reasoning_path: []}} />
+            <CodebaseGraph
+              graphData={graph && graph.nodes && graph.nodes.length > 0 ? graph : buildIssueGraph(issue)}
+              onNodeClick={undefined}
+            />
           </div>
         </div>
       </div>
     </div>
   )
+}
+
+// ─── Issue Graph Builder ────────────────────────────────────────────────────
+// Builds a minimal graph reflecting the actual file path from the issue data
+function buildIssueGraph(issue: { file?: string; type?: string } | undefined) {
+  if (!issue?.file) {
+    return {
+      nodes: [
+        { id: 'repository', label: 'Repository', type: 'file' },
+        { id: 'src', label: 'src/', type: 'file' },
+      ],
+      edges: [{ id: 'e-root', source: 'repository', target: 'src' }],
+      reasoning_path: [] as string[],
+    }
+  }
+
+  // Split the file path into segments, e.g. "src/utils/main.c" → ['src', 'utils', 'main.c']
+  const parts = issue.file.replace(/^\//, '').split('/')
+  const nodes: { id: string; label: string; type: string }[] = [
+    { id: 'repository', label: 'Repository', type: 'file' },
+  ]
+  const edges: { id: string; source: string; target: string }[] = []
+
+  let prevId = 'repository'
+  parts.forEach((part, i) => {
+    const isLast = i === parts.length - 1
+    const nodeId = parts.slice(0, i + 1).join('/')
+    nodes.push({
+      id: nodeId,
+      label: isLast ? part : `${part}/`,
+      type: isLast ? 'bug' : 'file',
+    })
+    edges.push({ id: `e-${prevId}-${nodeId}`, source: prevId, target: nodeId })
+    prevId = nodeId
+  })
+
+  return { nodes, edges, reasoning_path: [prevId] }
 }
 
 // ─── Diff Builder ──────────────────────────────────────────────────────────
