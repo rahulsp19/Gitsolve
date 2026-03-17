@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import OpenAI from 'openai';
+import { chunkCode } from './utils/chunking';
 
 // ─── Load environment ──────────────────────────────────────────────────────
 const dotenv = require('dotenv');
@@ -50,7 +51,7 @@ interface RepoFile {
 
 // ─── GitHub Helpers ────────────────────────────────────────────────────────
 const SKIP_DIRS = ['node_modules', '.git', 'dist', 'build', '__pycache__', '.next', 'vendor', '.venv', 'venv', 'coverage', '.cache'];
-const CODE_EXTENSIONS = ['.js', '.ts', '.tsx', '.jsx', '.py', '.go', '.java', '.rs', '.rb', '.php', '.c', '.cpp', '.h', '.cs'];
+const CODE_EXTENSIONS = ['.py', '.js', '.ts', '.java', '.go', '.c', '.cpp'];
 
 function githubHeaders(authHeader?: string) {
   const token = authHeader?.replace('Bearer ', '') || GITHUB_TOKEN;
@@ -74,64 +75,141 @@ function parseRepoUrl(input: string): { owner: string; repo: string } {
 }
 
 async function fetchRepoTree(owner: string, repo: string, authHeader?: string): Promise<{ filePaths: string[], empty: boolean, branch: string, error?: any }> {
+  console.log(`🔍 [REPO_EXPLORATION_START] Starting repository exploration for ${owner}/${repo}`);
+  
   try {
-    console.log("Fetching repo:", owner, repo);
+    console.log(`📡 [API_CALL] Fetching repository information for ${owner}/${repo}`);
     const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers: githubHeaders(authHeader) });
     
-    if (repoRes.status === 404) return { filePaths: [], empty: true, branch: '', error: { status: 'not_found', message: 'Repository not found or access denied.' } };
-    if (repoRes.status === 403) return { filePaths: [], empty: true, branch: '', error: { status: 'rate_limit', message: 'GitHub API rate limit exceeded.' } };
-    if (!repoRes.ok) throw new Error(`GitHub API error ${repoRes.status}`);
+    if (repoRes.status === 404) {
+      console.log(`❌ [ERROR] Repository not found or access denied: ${owner}/${repo}`);
+      return { filePaths: [], empty: true, branch: '', error: { status: 'not_found', message: 'Repository not found or access denied.' } };
+    }
+    if (repoRes.status === 403) {
+      console.log(`❌ [ERROR] GitHub API rate limit exceeded`);
+      return { filePaths: [], empty: true, branch: '', error: { status: 'rate_limit', message: 'GitHub API rate limit exceeded.' } };
+    }
+    if (!repoRes.ok) {
+      console.log(`❌ [ERROR] GitHub API error ${repoRes.status}: ${repoRes.statusText}`);
+      return { filePaths: [], empty: true, branch: '', error: { status: 'api_error', message: `GitHub API error ${repoRes.status}: ${repoRes.statusText}` } };
+    }
     
     const repoData: any = await repoRes.json();
+    let defaultBranch = repoData.default_branch;
 
-    const branch = repoData.default_branch || 'main';
-    console.log("Default branch:", branch);
+    // Try to determine the correct branch with fallback logic
+    const branchCandidates = [defaultBranch, 'main', 'master'];
+    let workingBranch = '';
+    let treeSha = '';
 
-    const branchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches/${branch}`, { headers: githubHeaders(authHeader) });
-    if (!branchRes.ok) {
-       if (branchRes.status === 404 || branchRes.status === 409) return { filePaths: [], empty: true, branch, error: { status: 'empty_repo', message: 'This repository has no files to analyze.' } };
-       throw new Error(`Branch fetch error ${branchRes.status}`);
+    console.log(`🌿 [BRANCH_DETECTION] Trying branches in order: ${branchCandidates.filter(Boolean).join(', ')}`);
+
+    for (const branch of branchCandidates) {
+      if (!branch) continue;
+      
+      console.log(`🔍 [BRANCH_CHECK] Checking branch: ${branch}`);
+      const branchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches/${branch}`, { headers: githubHeaders(authHeader) });
+      
+      if (branchRes.ok) {
+        const branchData: any = await branchRes.json();
+        const sha = branchData.commit?.commit?.tree?.sha;
+        
+        if (sha) {
+          workingBranch = branch;
+          treeSha = sha;
+          console.log(`✅ [BRANCH_SUCCESS] Found working branch: ${branch} with SHA: ${sha}`);
+          break;
+        } else {
+          console.log(`⚠️ [BRANCH_WARNING] Branch ${branch} exists but has no tree SHA`);
+        }
+      } else if (branchRes.status === 404) {
+        console.log(`❌ [BRANCH_NOT_FOUND] Branch ${branch} does not exist`);
+      } else {
+        console.log(`⚠️ [BRANCH_ERROR] Error checking branch ${branch}: ${branchRes.status}`);
+      }
     }
-    const branchData: any = await branchRes.json();
-    const sha = branchData.commit?.commit?.tree?.sha;
-    
-    if (!sha) return { filePaths: [], empty: true, branch, error: { status: 'empty_repo', message: 'This repository has no files to analyze.' } };
-    console.log("Tree SHA:", sha);
 
-    const treeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${sha}?recursive=1`, { headers: githubHeaders(authHeader) });
-    if (!treeRes.ok) throw new Error(`Tree fetch error ${treeRes.status}`);
+    if (!workingBranch || !treeSha) {
+      console.log(`❌ [ERROR] No valid branch found with accessible tree`);
+      return { filePaths: [], empty: true, branch: workingBranch || defaultBranch || 'main', error: { status: 'empty_repo', message: 'This repository has no accessible branches or files to analyze.' } };
+    }
+
+    console.log(`📂 [TREE_FETCH] Fetching recursive tree for branch: ${workingBranch}`);
+    const treeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${treeSha}?recursive=1`, { headers: githubHeaders(authHeader) });
+    
+    if (!treeRes.ok) {
+      console.log(`❌ [ERROR] Tree fetch error ${treeRes.status}: ${treeRes.statusText}`);
+      return { filePaths: [], empty: true, branch: workingBranch, error: { status: 'tree_error', message: `Failed to fetch repository tree: ${treeRes.statusText}` } };
+    }
     
     const data: any = await treeRes.json();
     const tree = data.tree || [];
-    console.log("Files found:", tree.length);
+    console.log(`📊 [FILES_DISCOVERED] Found ${tree.length} total items in repository`);
 
     const filePaths = tree
       .filter((item: any) => {
         if (item.type !== 'blob') return false;
         const ext = '.' + item.path.split('.').pop()?.toLowerCase();
-        if (!CODE_EXTENSIONS.includes(ext)) return false;
-        if (SKIP_DIRS.some((dir: string) => item.path.includes(`${dir}/`) || item.path.startsWith(`${dir}/`))) return false;
-        if (item.size && item.size > 100000) return false;
+        if (!CODE_EXTENSIONS.includes(ext)) {
+          console.log(`🔍 [FILTER] Skipping file with unsupported extension: ${item.path} (${ext})`);
+          return false;
+        }
+        if (SKIP_DIRS.some((dir: string) => item.path.includes(`${dir}/`) || item.path.startsWith(`${dir}/`))) {
+          console.log(`🔍 [FILTER] Skipping file in excluded directory: ${item.path}`);
+          return false;
+        }
+        if (item.size && item.size > 100000) {
+          console.log(`🔍 [FILTER] Skipping large file: ${item.path} (${item.size} bytes)`);
+          return false;
+        }
         return true;
       })
       .map((item: any) => item.path)
       .slice(0, 50);
 
-    return { filePaths, empty: filePaths.length === 0, branch };
+    console.log(`✅ [FILES_FILTERED] Found ${filePaths.length} relevant code files to analyze`);
+    
+    if (filePaths.length === 0) {
+      console.log(`⚠️ [WARNING] No matching files found with extensions: ${CODE_EXTENSIONS.join(', ')}`);
+      return { filePaths: [], empty: true, branch: workingBranch, error: { status: 'no_matching_files', message: `No files found with supported extensions: ${CODE_EXTENSIONS.join(', ')}` } };
+    }
+
+    return { filePaths, empty: false, branch: workingBranch };
   } catch (err: any) {
-     return { filePaths: [], empty: true, branch: '', error: { status: 'error', message: err.message } };
+    console.log(`❌ [ERROR] Unexpected error during repository exploration: ${err.message}`);
+    return { filePaths: [], empty: true, branch: '', error: { status: 'unexpected_error', message: `Repository exploration failed: ${err.message}` } };
   }
 }
 
 async function fetchFileContent(owner: string, repo: string, branch: string, path: string, authHeader?: string): Promise<string> {
-  const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${encodeURIComponent(path)}`;
-  const token = authHeader?.replace('Bearer ', '') || GITHUB_TOKEN;
-  const headers: any = { Accept: 'application/vnd.github.v3.raw' };
-  if (token) headers.Authorization = `token ${token}`;
+  console.log(`📥 [FILE_DOWNLOAD] Downloading: ${path} from ${owner}/${repo}/${branch}`);
+  
+  try {
+    const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${encodeURIComponent(path)}`;
+    const token = authHeader?.replace('Bearer ', '') || GITHUB_TOKEN;
+    const headers: any = { Accept: 'application/vnd.github.v3.raw' };
+    if (token) headers.Authorization = `token ${token}`;
 
-  const res = await fetch(url, { headers });
-  if (!res.ok) return '';
-  return await res.text();
+    const res = await fetch(url, { headers });
+    
+    if (!res.ok) {
+      console.log(`❌ [FILE_ERROR] Failed to download ${path}: ${res.status} ${res.statusText}`);
+      return '';
+    }
+    
+    const content = await res.text();
+    
+    if (!content || content.trim().length === 0) {
+      console.log(`⚠️ [FILE_WARNING] File ${path} is empty or contains only whitespace`);
+      return '';
+    }
+    
+    console.log(`✅ [FILE_SUCCESS] Downloaded ${path} (${content.length} characters)`);
+    return content;
+  } catch (err: any) {
+    console.log(`❌ [FILE_ERROR] Exception downloading ${path}: ${err.message}`);
+    return '';
+  }
 }
 
 // ─── AI Analysis ───────────────────────────────────────────────────────────
@@ -425,44 +503,132 @@ app.post('/api/analyze', async (req, res) => {
     const authHeader = req.headers.authorization;
 
     // Step 1: repo-exploration
-    console.log('📂 Fetching repository tree...');
+    console.log('📂 [STEP_1] Starting repository exploration...');
     const { filePaths, empty, branch, error: treeError } = await fetchRepoTree(owner, repo, authHeader);
     
     if (empty && treeError?.status === 'empty_repo') {
+      console.log(`⚠️ [STEP_1_COMPLETE] Repository is empty: ${treeError.message}`);
       return res.json({ status: 'empty_repo', message: treeError.message });
-    } else if (empty && treeError) {
-      return res.status(400).json({ error: treeError.message || 'Repository fetch failed' });
-    }
-
-    console.log(`   Found ${filePaths.length} code files`);
-
-    if (filePaths.length === 0) {
+    } else if (empty && treeError?.status === 'no_matching_files') {
+      console.log(`⚠️ [STEP_1_COMPLETE] No matching files found: ${treeError.message}`);
       return res.json({
         repoName,
         issues: [],
         metrics: { filesScanned: 0, functionsAnalyzed: 0, issuesDetected: 0, securityRisks: 0 },
-        agentSteps: [],
+        agentSteps: [{
+          id: 'step-1',
+          agent_name: 'repo-exploration',
+          status: 'success',
+          description: treeError.message,
+          completed_at: new Date().toISOString(),
+          step_order: 1,
+        }],
+      });
+    } else if (empty && treeError) {
+      console.log(`❌ [STEP_1_ERROR] Repository exploration failed: ${treeError.message}`);
+      return res.status(400).json({ error: treeError.message || 'Repository fetch failed' });
+    }
+
+    console.log(`✅ [STEP_1_COMPLETE] Found ${filePaths.length} code files to analyze`);
+
+    if (filePaths.length === 0) {
+      console.log(`⚠️ [EMPTY_RESULT] No files to analyze, returning empty result`);
+      return res.json({
+        repoName,
+        issues: [],
+        metrics: { filesScanned: 0, functionsAnalyzed: 0, issuesDetected: 0, securityRisks: 0 },
+        agentSteps: [{
+          id: 'step-1',
+          agent_name: 'repo-exploration',
+          status: 'success',
+          description: 'Repository exploration completed but no files found matching criteria',
+          completed_at: new Date().toISOString(),
+          step_order: 1,
+        }],
       });
     }
 
-    // Step 2: code-understanding
-    console.log('📄 Downloading file contents...');
+    // Step 2: code-understanding (file downloading)
+    console.log('📄 [STEP_2] Starting file content download...');
     const files: RepoFile[] = [];
+    let downloadSuccessCount = 0;
+    let downloadFailureCount = 0;
+    
     for (const path of filePaths) {
       const content = await fetchFileContent(owner, repo, branch, path, authHeader);
       if (content) {
         files.push({ path, content, size: content.length });
+        downloadSuccessCount++;
+      } else {
+        downloadFailureCount++;
       }
     }
-    console.log(`   Downloaded ${files.length} files`);
-
-    const codeChunks = files.map(f => `### File: ${f.path}\n\`\`\`\n${f.content.slice(0, 3000)}\n\`\`\``).join('\n\n');
+    
+    console.log(`✅ [STEP_2_COMPLETE] File download complete: ${downloadSuccessCount} successful, ${downloadFailureCount} failed`);
 
     // Step 3: validation & issue detection (using OpenRouter)
-    // Connect to specific analysis model
     let allIssues: AnalyzedIssue[] = [];
+    let totalChunksGenerated = 0;
+    
     if (files.length > 0) {
-       allIssues = await analyzeRepositoryCode(codeChunks);
+       console.log('🔍 [STEP_3] Starting code analysis and chunking...');
+       const smallFiles = files.filter(f => f.content.split('\n').length <= 150);
+       const largeFiles = files.filter(f => f.content.split('\n').length > 150);
+
+       console.log(`📊 [FILE_CATEGORIZATION] ${smallFiles.length} small files, ${largeFiles.length} large files`);
+
+       const tasks: (() => Promise<AnalyzedIssue[]>)[] = [];
+
+       if (smallFiles.length > 0) {
+           const smallFilesChunks = smallFiles.map(f => `### File: ${f.path}\n\`\`\`\n${f.content.slice(0, 3000)}\n\`\`\``).join('\n\n');
+           tasks.push(() => analyzeRepositoryCode(smallFilesChunks));
+           totalChunksGenerated++;
+           console.log(`🧩 [CHUNK_GENERATED] Created 1 chunk for ${smallFiles.length} small files`);
+       }
+
+       for (const file of largeFiles) {
+           const chunks = chunkCode(file.content);
+           totalChunksGenerated += chunks.length;
+           console.log(`🧩 [CHUNK_GENERATED] Created ${chunks.length} chunks for file: ${file.path}`);
+           
+           for (let i = 0; i < chunks.length; i++) {
+               tasks.push(async () => {
+                   console.log(`🔍 [ANALYSIS] Analyzing ${file.path} - chunk ${i + 1}/${chunks.length}`);
+                   const chunkPrompt = `### File: ${file.path}\n\`\`\`\n${chunks[i]}\n\`\`\``;
+                   return analyzeRepositoryCode(chunkPrompt);
+               });
+           }
+       }
+
+       console.log(`📊 [CHUNKS_GENERATED] Total chunks created: ${totalChunksGenerated}`);
+
+       // Run tasks with concurrency limit
+       const CONCURRENCY_LIMIT = 5;
+       console.log(`🚀 [ANALYSIS_START] Running ${tasks.length} analysis tasks with concurrency limit ${CONCURRENCY_LIMIT}`);
+       
+       for (let i = 0; i < tasks.length; i += CONCURRENCY_LIMIT) {
+           const batch = tasks.slice(i, i + CONCURRENCY_LIMIT);
+           console.log(`🔄 [BATCH_PROCESSING] Processing batch ${Math.floor(i / CONCURRENCY_LIMIT) + 1}/${Math.ceil(tasks.length / CONCURRENCY_LIMIT)}`);
+           
+           const batchResults = await Promise.all(batch.map(fn => fn()));
+           for (const issues of batchResults) {
+               allIssues.push(...issues);
+           }
+       }
+
+       // Deduplicate issues
+       const uniqueIssues = new Map();
+       for (const issue of allIssues) {
+           const key = `${issue.file}-${issue.line}-${issue.type}`;
+           if (!uniqueIssues.has(key)) {
+               uniqueIssues.set(key, issue);
+           }
+       }
+       allIssues = Array.from(uniqueIssues.values());
+       
+       console.log(`✅ [STEP_3_COMPLETE] Analysis complete: ${allIssues.length} unique issues detected`);
+    } else {
+       console.log(`⚠️ [STEP_3_SKIP] No files available for analysis`);
     }
 
     // Step 4: Compute metrics
@@ -484,7 +650,7 @@ app.post('/api/analyze', async (req, res) => {
         id: 'step-1',
         agent_name: 'repo-exploration',
         status: 'success' as const,
-        description: `Fetched repository tree from GitHub and identified ${filePaths.length} key code files.`,
+        description: `Repository exploration completed successfully. Found ${filePaths.length} relevant code files using branch '${branch}'.`,
         completed_at: new Date().toISOString(),
         step_order: 1,
       },
@@ -492,7 +658,7 @@ app.post('/api/analyze', async (req, res) => {
         id: 'step-2',
         agent_name: 'code-understanding',
         status: 'success' as const,
-        description: `Extracted and mapped code patterns. Evaluated ${functionsAnalyzed} structural functions.`,
+        description: `File download completed successfully. Downloaded ${downloadSuccessCount} files (${downloadFailureCount} failed). Evaluated ${functionsAnalyzed} structural functions.`,
         completed_at: new Date().toISOString(),
         step_order: 2,
       },
@@ -500,7 +666,7 @@ app.post('/api/analyze', async (req, res) => {
         id: 'step-3',
         agent_name: 'validation',
         status: 'success' as const,
-        description: `Ran rigorous OpenRouter analysis sequence. Detected ${allIssues.length} concrete issues.`,
+        description: `Code analysis completed successfully. Generated ${totalChunksGenerated} chunks and detected ${allIssues.length} unique issues.`,
         completed_at: new Date().toISOString(),
         step_order: 3,
       },
@@ -508,7 +674,7 @@ app.post('/api/analyze', async (req, res) => {
         id: 'step-4',
         agent_name: 'solution-planning',
         status: 'success' as const,
-        description: `Classified issues by severity and priority (Security/Perf/Bugs). Orchestration complete.`,
+        description: `Issue classification completed. Categorized issues by severity and priority (Security/Perf/Bugs).`,
         completed_at: new Date().toISOString(),
         step_order: 4,
       },
@@ -516,13 +682,14 @@ app.post('/api/analyze', async (req, res) => {
         id: 'step-5',
         agent_name: 'architecture-mapping',
         status: 'success' as const,
-        description: `Mapped codebase dependencies and isolated reasoning paths.`,
+        description: `Codebase mapping completed. Built dependency graph with ${files.length} nodes and identified reasoning paths.`,
         completed_at: new Date().toISOString(),
         step_order: 5,
       },
     ];
 
-    console.log(`✅ Analysis complete!\n`);
+    console.log(`🎉 [ANALYSIS_COMPLETE] Repository analysis completed successfully!`);
+    console.log(`📊 [FINAL_METRICS] Files: ${files.length}, Issues: ${allIssues.length}, Chunks: ${totalChunksGenerated}`);
 
     const codebaseGraph = buildDependencyGraph(files, allIssues);
 
@@ -534,8 +701,32 @@ app.post('/api/analyze', async (req, res) => {
       graph: codebaseGraph
     });
   } catch (err: any) {
-    console.error('Analysis error:', err);
-    res.status(500).json({ error: err.message || 'Analysis failed' });
+    console.error('❌ [CRITICAL_ERROR] Analysis failed with unexpected error:', err);
+    
+    // Provide meaningful error messages instead of generic "Analysis failed"
+    let errorMessage = err.message || 'Analysis failed';
+    let errorType = 'unknown_error';
+    
+    if (err.message?.includes('fetch')) {
+      errorType = 'network_error';
+      errorMessage = 'Network error occurred while fetching repository data';
+    } else if (err.message?.includes('parse')) {
+      errorType = 'parse_error';
+      errorMessage = 'Error parsing repository data or AI response';
+    } else if (err.message?.includes('timeout')) {
+      errorType = 'timeout_error';
+      errorMessage = 'Analysis timed out. Please try again with a smaller repository';
+    } else if (err.message?.includes('rate limit')) {
+      errorType = 'rate_limit_error';
+      errorMessage = 'GitHub API rate limit exceeded. Please try again later';
+    }
+    
+    console.error(`❌ [ERROR_DETAILS] Type: ${errorType}, Message: ${errorMessage}`);
+    res.status(500).json({ 
+      error: errorMessage, 
+      errorType,
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 });
 

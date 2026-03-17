@@ -1,7 +1,7 @@
 import { BaseAgent } from '../orchestrator/BaseAgent.ts'
 import type { AgentContext, FileIndex } from '../../types/index.ts'
 
-const SUPPORTED_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.py', '.go', '.rs', '.java', '.rb']
+const SUPPORTED_EXTENSIONS = ['.py', '.js', '.ts', '.java', '.go', '.c', '.cpp'];
 const SKIP_DIRS = ['node_modules', '.git', 'dist', 'build', '__pycache__', '.next', 'vendor']
 
 export class RepoExplorationAgent extends BaseAgent {
