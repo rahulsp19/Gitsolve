@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import { useAuthStore } from './stores/authStore'
-import LandingPage from './pages/LandingPage'
 import Login from './pages/Login'
 import RepoSelector from './pages/RepoSelector'
 import AnalysisProgress from './pages/AnalysisProgress'
@@ -10,6 +9,8 @@ import IssueSummary from './pages/IssueSummary'
 import FixPreview from './pages/FixPreview'
 import PRSuccess from './pages/PRSuccess'
 import { NotificationProvider } from './components/NotificationProvider'
+import IndexPage from './pages'
+import Dashboard from './pages/Dashboard'
 
 export default function App() {
   const { setUser, setSession } = useAuthStore()
@@ -60,8 +61,9 @@ export default function App() {
     <div className="min-h-screen bg-[#111921] text-slate-100 font-display">
       <NotificationProvider>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<IndexPage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/repos" element={<RepoSelector />} />
           <Route path="/analysis" element={<AnalysisProgress />} />
           <Route path="/issues" element={<IssueSummary />} />
